@@ -906,7 +906,7 @@ function statBarJunta(){
 
 function renderStats(){
   $('statsBox').innerHTML = [
-    statBar('Fútbol','futbol'),
+    statBar('Media','futbol'),
     statBar('Fama','fama','gold'),
     statBar('Cabeza','cabeza'),
     statBar('Barrio','barrio'),
@@ -1686,7 +1686,7 @@ function eventsFor33plus(){
         {label:'Hacer catarsis y sincerarte con todo', eff:{opinion:8, prensa:8, cabeza:4}, log:'hizo catarsis en una entrevista de balance'},
         {label:'Cuidar cada palabra, sin arriesgar nada', eff:{prensa:3}, log:'cuidó cada palabra en una entrevista de balance'},
       ]},
-    { tag:'HOMENAJE', text:`El club te organiza un partido homenaje por tu trayectoria, con invitados de lujo.`,
+    { tag:'HOMENAJE', retiro:true, text:`El club te organiza un partido homenaje por tu trayectoria, con invitados de lujo.`,
       choices:[
         {label:'Disfrutarlo a pleno, es tu noche', eff:{barrio:8, opinion:5, fama:4}, log:'disfrutó su partido homenaje'},
         {label:'Pedir que lo hagan más chico, no te gusta la exposición', eff:{barrio:3, prensa:3}, log:'pidió bajar el perfil de su homenaje'},
@@ -1706,7 +1706,7 @@ function eventsFor33plus(){
         {label:'Meterse a fondo en la fundación', eff:{barrio:8, opinion:6, guita:-4}, log:'se metió de lleno en una fundación social con su nombre', setFlag:'tieneFundacion'},
         {label:'Prestar la cara, pero sin involucrarse', eff:{opinion:2, prensa:-2}, log:'prestó su nombre a una fundación sin involucrarse de lleno'},
       ]},
-    { tag:'RUMOR DE RETIRO', text:`Empiezan a circular rumores fuertes de un retiro anticipado por la presión de los medios sobre tu nivel.`,
+    { tag:'RUMOR DE RETIRO', retiro:true, text:`Empiezan a circular rumores fuertes de un retiro anticipado por la presión de los medios sobre tu nivel.`,
       choices:[
         {label:'Salir a desmentirlo con fuerza', eff:{opinion:4, prensa:-3}, log:'desmintió con fuerza rumores de un retiro anticipado'},
         {label:'Dejar correr el rumor sin decir nada', eff:{prensa:-4}, log:'dejó correr un rumor de retiro anticipado sin aclararlo'},
@@ -1756,7 +1756,7 @@ function eventsFor33plus(){
         {label:'Pelearla fuerte a través de los abogados', eff:{guita:-8, opinion:-4}, log:'peleó fuerte una disputa pública por sus hijos'},
         {label:'Buscar un acuerdo privado, lejos de los medios', eff:{opinion:3, prensa:3}, log:'buscó un acuerdo privado en una disputa por sus hijos'},
       ]},
-    { tag:'FIESTA DE DESPEDIDA', text:`Organizás una fiesta de despedida a lo grande que termina con algún que otro escándalo filtrado a la prensa.`,
+    { tag:'FIESTA DE DESPEDIDA', retiro:true, text:`Organizás una fiesta de despedida a lo grande que termina con algún que otro escándalo filtrado a la prensa.`,
       choices:[
         {label:'No arrepentirse de nada, fue una noche única', eff:{barrio:5, opinion:-5}, log:'no se arrepintió de una fiesta de despedida que terminó en escándalo'},
         {label:'Salir a bajarle el tono al escándalo', eff:{prensa:3, opinion:2}, log:'bajó el tono a un escándalo de su fiesta de despedida'},
@@ -1816,7 +1816,7 @@ function eventsFor33plus(){
         {label:'Comprar el porcentaje del club', eff:{guita:-16, candidateable:6, barrio:5}, log:'se convirtió en socio inversor de un club chico de su zona'},
         {label:'No meterse todavía en la dirigencia', eff:{guita:2}, log:'rechazó comprar un porcentaje de un club chico'},
       ]},
-    { tag:'DESPEDIDA CON POLÉMICA', text:`En tu último partido, decidís si dedicarle el festejo a algo que puede generar polémica en los medios.`,
+    { tag:'DESPEDIDA CON POLÉMICA', retiro:true, text:`En tu último partido, decidís si dedicarle el festejo a algo que puede generar polémica en los medios.`,
       choices:[
         {label:'Hacer el gesto polémico igual, es mi despedida', eff:{fama:5, opinion:-6}, log:'hizo un gesto polémico en su despedida como jugador'},
         {label:'Mantenerlo simple y emotivo', eff:{opinion:5, barrio:4}, log:'tuvo una despedida simple y emotiva'},
@@ -1907,10 +1907,46 @@ function simularTemporada(){
     probTitulo *= (0.5 + fEfectivo/100);
     if(Math.random() < probTitulo){
       state.carreraTitulos += 1;
-      addLog(`salió campeón con ${state.club.n}`);
+      state.flags.pendingTituloGanado = elegirCompetencia(state.club);
     }
   }
   return state.temporadaStats;
+}
+
+function elegirCompetencia(club){
+  let opciones;
+  if(club.d === 'EU'){
+    if(club.pais === 'ESP') opciones = [['LaLiga',30], ['Copa del Rey',40], ['Europa League',20], ['Champions League',10]];
+    else if(club.pais === 'ING') opciones = [['Premier League',30], ['FA Cup',40], ['Europa League',20], ['Champions League',10]];
+    else opciones = [['Serie A',30], ['Coppa Italia',40], ['Europa League',20], ['Champions League',10]];
+  } else if(club.d === 'MX'){
+    opciones = [['Liga MX',30], ['Copa MX',40], ['Leagues Cup',20], ['Concachampions',10]];
+  } else {
+    opciones = [['Liga Argentina',30], ['Copa Argentina',40], ['Copa Sudamericana',20], ['Copa Libertadores',10]];
+  }
+  const total = opciones.reduce((a,o)=>a+o[1], 0);
+  let roll = Math.random() * total;
+  for(const [nombre, peso] of opciones){
+    if(roll < peso) return nombre;
+    roll -= peso;
+  }
+  return opciones[0][0];
+}
+
+function tituloGanadoEvent(competencia){
+  return { tag:'SALISTE CAMPEÓN', text:`Diste la vuelta olímpica: saliste campeón de ${competencia} con ${state.club.n}.`,
+    choices:[
+      {label:'Festejar a pleno con el plantel', eff:{plantel:6, fama:3}, log:`salió campeón de ${competencia} con ${state.club.n} y lo festejó a pleno con el plantel`},
+      {label:'Festejarlo en familia, tranquilo', eff:{cabeza:3}, log:`salió campeón de ${competencia} con ${state.club.n}`},
+    ]};
+}
+
+function tituloGanadoDTEvent(competencia){
+  return { tag:'CAMPEÓN COMO DT', text:`Diste la vuelta olímpica como entrenador: saliste campeón de ${competencia} con ${state.club.n}.`,
+    choices:[
+      {label:'Festejarlo a pleno con el plantel', eff:{fama:4, opinion:3}, log:`salió campeón de ${competencia} como DT de ${state.club.n}`},
+      {label:'Festejarlo con perfil bajo', eff:{cabeza:3}, log:`salió campeón de ${competencia} como DT de ${state.club.n}, con perfil bajo`},
+    ]};
 }
 
 function tierParaNivel(futbol){
@@ -2042,7 +2078,7 @@ function finDeCicloEvent(){
     text:`Fin de ciclo. Tu club decidió no renovarte. Elegí el próximo paso de tu carrera.`,
     choices:[
       {
-        label:`Oferta de un club cualquiera de Argentina — ${clubCualquiera.n} (${nombreLiga(clubCualquiera)}) — ${years} año${years===1?'':'s'} — ${fmtUSD(salary)}/año`,
+        label:`${clubCualquiera.n} (${nombreLiga(clubCualquiera)}) — ${years} año${years===1?'':'s'} — ${fmtUSD(salary)}/año`,
         eff:{}, log:`fin de ciclo: firmó con ${clubCualquiera.n}`,
         special:'firmarContrato', offerData:{club:clubCualquiera, years, salary},
       },
@@ -2245,7 +2281,7 @@ function simularTemporadaDT(){
   probTituloDT *= (0.5 + nivel/100);
   if(Math.random() < probTituloDT){
     state.dtTitulos += 1;
-    addLog(`salió campeón como DT de ${state.club.n}`);
+    state.flags.pendingTituloGanadoDT = elegirCompetencia(state.club);
   }
 }
 
@@ -2660,6 +2696,16 @@ function darkRiskCheck(){
 function buildSeasonQueue(){
   decaerCooldowns();
   const q = [];
+  if(state.flags.pendingTituloGanado){
+    const comp = state.flags.pendingTituloGanado;
+    state.flags.pendingTituloGanado = null;
+    q.push(tituloGanadoEvent(comp));
+  }
+  if(state.flags.pendingTituloGanadoDT){
+    const comp = state.flags.pendingTituloGanadoDT;
+    state.flags.pendingTituloGanadoDT = null;
+    q.push(tituloGanadoDTEvent(comp));
+  }
   if(state.phase==='jugador' && state.flags.fichajeIrregular){
     state.flags.fichajeIrregular = false;
     if(Math.random() < 0.30){
@@ -2691,7 +2737,8 @@ function buildSeasonQueue(){
   if(state.phase==='jugador' && (state.club.d==='PD' || state.club.d==='PN') && state.age >= 27 && state.age <= 30 && Math.random() < 0.18){
     q.push(ofertaMexicoEvent());
   }
-  if(state.phase==='jugador' && state.age >= 34 && state.age <= 40 && !state.flags.definioFuturo){
+  if(state.phase==='jugador' && !state.flags.definioFuturo && (state.flags.pendingDefinirFuturo || (state.age >= 34 && state.age <= 40))){
+    state.flags.pendingDefinirFuturo = false;
     q.push(definirFuturoEvent());
   }
   if(state.phase==='dt' && (!state.dtContract || state.dtContract.yearsLeft <= 0)){
@@ -2800,7 +2847,7 @@ function nextTurn(){
 }
 
 function renderEvent(ev){
-  state.currentEventMeta = {tag: ev.tag, danger: !!ev.danger, clubReact: !!ev.clubReact};
+  state.currentEventMeta = {tag: ev.tag, danger: !!ev.danger, clubReact: !!ev.clubReact, retiro: !!ev.retiro};
   $('eventTag').textContent = ev.tag;
   $('eventTag').className = 'event-tag' + (ev.danger ? ' danger' : '');
   $('eventText').textContent = ev.text;
@@ -2834,6 +2881,9 @@ function resolveChoice(c){
   }
   if(state.currentEventMeta && state.currentEventMeta.clubReact){
     reaccionDelClub(0.22);
+  }
+  if(state.currentEventMeta && state.currentEventMeta.retiro && state.phase==='jugador' && !state.flags.definioFuturo){
+    state.flags.pendingDefinirFuturo = true;
   }
   if(c.setFlag){ state.flags[c.setFlag] = true; }
   addLog(c.log + sufijo);
@@ -3323,7 +3373,7 @@ function finishGame(reason){
   $('stamp').className = 'stamp' + (danger ? ' danger' : '') + (title==='LEYENDA' ? ' leyenda' : '');
   $('endFlavor').textContent = flavor;
   $('finalStats').innerHTML = [
-    ['FÚTBOL', state.futbolMaximo], ['FAMA', s.fama], ['PLANTEL', s.plantel],
+    ['MEDIA MÁXIMA ALCANZADA', state.futbolMaximo], ['FAMA', s.fama], ['PLANTEL', s.plantel],
     ['CABEZA', s.cabeza], ['BARRIO', s.barrio], ['JUNTA', s.junta>=50?'BUENA':'MALA'], ['OPINIÓN', s.opinion], ['PRENSA', s.prensa], ['ROSCA', s.candidateable],
   ].map(([l,n])=>`<div class="fstat"><div class="n">${n}</div><div class="l">${l}</div></div>`).join('');
 
