@@ -36,6 +36,28 @@
   opacity: .9;
   margin: 0 0 8px auto;
 }
+.social-row{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  margin-top:18px;
+  flex-wrap:wrap;
+}
+.social-link{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  font-family:'IBM Plex Mono', monospace;
+  font-size:11.5px;
+  color: var(--muted);
+  text-decoration:none;
+  border:1px solid var(--line);
+  border-radius:20px;
+  padding:6px 14px;
+  background: var(--panel);
+  transition: color .15s, border-color .15s;
+}
+.social-link:hover{ color: var(--gold); border-color: var(--gold); }
 
 body{
   margin:0;
@@ -517,6 +539,10 @@ button.primary:disabled{ opacity:.4; cursor:not-allowed; }
 
       <button class="primary" id="startBtn" disabled>Arrancar la carrera</button>
     </div>
+    <div class="social-row">
+      <a class="social-link" href="https://www.instagram.com/valedoble90/" target="_blank" rel="noopener noreferrer">📷 Instagram</a>
+      <a class="social-link" href="https://www.tiktok.com/@valedoble90" target="_blank" rel="noopener noreferrer">🎵 TikTok</a>
+    </div>
   </div>
 
   <div id="game">
@@ -562,6 +588,10 @@ button.primary:disabled{ opacity:.4; cursor:not-allowed; }
     </div>
 
     <div class="log" id="log"></div>
+    <div class="social-row">
+      <a class="social-link" href="https://www.instagram.com/valedoble90/" target="_blank" rel="noopener noreferrer">📷 Instagram</a>
+      <a class="social-link" href="https://www.tiktok.com/@valedoble90" target="_blank" rel="noopener noreferrer">🎵 TikTok</a>
+    </div>
   </div>
 
   <div id="end">
@@ -587,6 +617,10 @@ button.primary:disabled{ opacity:.4; cursor:not-allowed; }
     </div>
 
     <button class="primary" onclick="location.reload()">Nueva carrera</button>
+    <div class="social-row">
+      <a class="social-link" href="https://www.instagram.com/valedoble90/" target="_blank" rel="noopener noreferrer">📷 Instagram</a>
+      <a class="social-link" href="https://www.tiktok.com/@valedoble90" target="_blank" rel="noopener noreferrer">🎵 TikTok</a>
+    </div>
   </div>
 
 </div>
@@ -610,11 +644,11 @@ function elegirPotencial(){
 }
 
 const STYLES = [
-  {id:'gambeta', t:'Gambeta de potrero', d:'Todo pinta y confianza. Subís rápido en Fútbol y Fama, pero la Cabeza te cuesta el doble.',
+  {id:'mago', t:'🪄 El Mago', d:'Mucha pinta y confianza. Las cámaras te buscan desde que pisás el césped. Tenés una gambeta endiablada pero no resistís GPS. La noche es tu debilidad.',
     mod:{futbol:8, cabeza:-4, junta:0}},
-  {id:'laburador', t:'El que labura calladito', d:'Menos vistoso, pero constante. Sube Cabeza y Barrio, cuesta más juntar Fama.',
+  {id:'laburador', t:'🤫 El que labura calladito', d:'Calma y buen juego, el fútbol es lo más importante para vos. En el barrio sos el líder y todos te tratan como un rey. No te gustan las cámaras.',
     mod:{futbol:2, cabeza:6, barrio:4}},
-  {id:'vidriera', t:'Siempre en la vidriera', d:'Redes, prensa, entrevistas. Fama y Rosca altos desde el arranque, Cabeza floja.',
+  {id:'vidriera', t:'🔝 Siempre en la vidriera', d:'Los micrófonos y los estudios de TV son el patio de tu casa. Te gusta declarar picante y ponés el pecho a las repercusiones. "Amigo" de todos. ¿El fútbol? Está en un segundo plano.',
     mod:{fama:8, candidateable:6, cabeza:-3}},
 ];
 
@@ -809,7 +843,7 @@ $('dorsal').addEventListener('input', checkStart);
 function clamp(v){ return Math.max(0, Math.min(100, Math.round(v))); }
 
 $('startBtn').onclick = ()=>{
-  const base = {futbol:30, fama:10, guita:15, cabeza:55, barrio:60, junta:50, candidateable:5, opinion:60, prensa:50};
+  const base = {futbol:30, fama:10, cabeza:55, barrio:60, junta:50, plantel:50, candidateable:5, opinion:60, prensa:50};
   Object.keys(selectedStyle.mod).forEach(k=> base[k] = clamp(base[k] + selectedStyle.mod[k]));
   const club = randomClub();
   state = {
@@ -821,6 +855,7 @@ $('startBtn').onclick = ()=>{
     phase: 'jugador',
     suspensionYearsLeft: 0,
     club: club,
+    clubInicial: club,
     contract: {yearsLeft: 5, salaryPerYear: computeSalary(club, base.futbol, 16)},
     carreraGanancias: 0,
     carreraPJ: 0, carreraGoles: 0, carreraAsistencias: 0,
@@ -830,7 +865,9 @@ $('startBtn').onclick = ()=>{
     modFutbolTemporal: 0,
     modPartidosTemporal: 0,
     dtContract: null,
-    dtPJ: 0, dtGanados: 0, dtEmpatados: 0, dtPerdidos: 0,
+    dtPJ: 0, dtGanados: 0, dtEmpatados: 0, dtPerdidos: 0, dtTitulos: 0,
+    futbolMaximo: base.futbol,
+    carreraTitulos: 0,
     dtTemporada: null,
     historyBlocks: [],
     currentSeasonEvents: [],
@@ -871,9 +908,9 @@ function renderStats(){
   $('statsBox').innerHTML = [
     statBar('Fútbol','futbol'),
     statBar('Fama','fama','gold'),
-    statBar('Guita','guita','gold'),
     statBar('Cabeza','cabeza'),
     statBar('Barrio','barrio'),
+    statBar('Plantel','plantel'),
     statBarJunta(),
     statBar('Opinión','opinion'),
     statBar('Prensa','prensa'),
@@ -905,7 +942,7 @@ function renderStats(){
     } else {
       $('seasonNumbers').innerHTML = chip('📋','-','PD') + chip('🏆','-','PG') + chip('🤝','-','PE') + chip('❌','-','PP');
     }
-    $('careerNumbers').innerHTML = chip('📋', state.dtPJ, 'PD') + chip('🏆', state.dtGanados, 'PG') + chip('🤝', state.dtEmpatados, 'PE') + chip('❌', state.dtPerdidos, 'PP');
+    $('careerNumbers').innerHTML = chip('📋', state.dtPJ, 'PD') + chip('🏆', state.dtGanados, 'PG') + chip('🤝', state.dtEmpatados, 'PE') + chip('🥇', state.dtTitulos, 'Títulos');
   } else {
     if(state.temporadaStats){
       const t = state.temporadaStats;
@@ -913,7 +950,7 @@ function renderStats(){
     } else {
       $('seasonNumbers').innerHTML = chip('👟','-','PJ') + chip('⚽','-','Goles') + chip('🤝','-','Asist.');
     }
-    $('careerNumbers').innerHTML = chip('👟', state.carreraPJ, 'PJ') + chip('⚽', state.carreraGoles, 'Goles') + chip('🤝', state.carreraAsistencias, 'Asist.');
+    $('careerNumbers').innerHTML = chip('👟', state.carreraPJ, 'PJ') + chip('⚽', state.carreraGoles, 'Goles') + chip('🤝', state.carreraAsistencias, 'Asist.') + chip('🥇', state.carreraTitulos, 'Títulos');
   }
 
   renderTimeline();
@@ -946,11 +983,13 @@ function applyEffects(eff){
   if(!eff) return;
   Object.keys(eff).forEach(k=>{
     if(k==='guita'){
-      state.stats.guita = Math.max(0, state.stats.guita + eff.guita);
-      // Toda plata que mueve el stat "Guita" también pega en la plata real de carrera.
+      // La plata ya no tiene un stat visible propio: pega directo en la plata real de carrera.
       state.carreraGanancias += Math.round(eff.guita * 1400);
     }
-    else if(state.stats[k]!==undefined){ state.stats[k] = clamp(state.stats[k] + eff[k]); }
+    else if(state.stats[k]!==undefined){
+      state.stats[k] = clamp(state.stats[k] + eff[k]);
+      if(k==='futbol' && state.stats.futbol > state.futbolMaximo) state.futbolMaximo = state.stats.futbol;
+    }
   });
 }
 
@@ -1017,7 +1056,7 @@ function reaccionDelClub(prob){
   if(Math.random() < 0.5){
     // Rescisión automática por causas extrafutbolísticas: el jugador queda sin club,
     // hasta que llegue una nueva oferta (necesariamente de un equipo menor).
-    state.club = { n:'Sin club', d:'LIBRE', t:5 };
+    cambiarClub({ n:'Sin club', d:'LIBRE', t:5 });
     state.contract = null;
     state.prestamo = null;
     state.flags.recienRescindido = true;
@@ -1055,7 +1094,7 @@ function eventsFor16to19(){
     { tag:'NOVATADA', text:`Los más grandes de la sub-20 te preparan una novatada bastante pesada para "iniciarte" en el plantel.`,
       choices:[
         {label:'Bancármela sin quejarme', eff:{barrio:6, cabeza:-4}, log:'se bancó una novatada pesada sin quejarse'},
-        {label:'Plantarme y decir que no', eff:{cabeza:4, barrio:-5, junta:-3}, log:'se plantó ante una novatada pesada'},
+        {label:'Plantarme y decir que no', eff:{cabeza:4, barrio:-5}, log:'se plantó ante una novatada pesada'},
       ]},
     { tag:'PRÉSTAMO FAMILIAR', text:`Tu viejo se queda sin laburo y te pide unos pesos prestados para pasar el mes, "cuando cobres del club me devolvés".`,
       choices:[
@@ -1074,7 +1113,7 @@ function eventsFor16to19(){
       ]},
     { tag:'CÁBALA', text:`Un compañero más grande te convence de armar una cábala rarísima antes de cada partido, "sin eso no rendís".`,
       choices:[
-        {label:'Sumarme a la cábala a full', eff:{cabeza:-3, junta:4, barrio:3}, log:'se sumó a una cábala rarísima del plantel'},
+        {label:'Sumarme a la cábala a full', eff:{cabeza:-3, barrio:3}, log:'se sumó a una cábala rarísima del plantel'},
         {label:'Reírme y no hacerle caso', eff:{cabeza:3}, log:'se rio de la cábala y no le dio bola'},
       ]},
     { tag:'TATUAJE', text:`Te querés tatuar el escudo del club en la cara, algo que en el barrio ya es leyenda pero afuera puede pegar mal.`,
@@ -1090,12 +1129,12 @@ function eventsFor16to19(){
     { tag:'PELEA EN EL BOLICHE', text:`Una salida con amigos termina en una pelea a las trompadas con hinchas de otro club.`,
       choices:[
         {label:'Meterme de lleno en la pelea', eff:{barrio:5, cabeza:-8, opinion:-5}, log:'se metió en una pelea de boliche'},
-        {label:'Separar y sacar a los amigos de ahí', eff:{cabeza:5, junta:4}, log:'evitó una pelea de boliche sacando a sus amigos'},
+        {label:'Separar y sacar a los amigos de ahí', eff:{cabeza:5}, log:'evitó una pelea de boliche sacando a sus amigos'},
       ]},
     { tag:'REGALO SOSPECHOSO', text:`Un hincha con plata te regala una moto 0km "para que no te falte nada", sin pedir nada a cambio... por ahora.`,
       choices:[
-        {label:'Aceptar el regalo', eff:{guita:10, junta:-6}, log:'aceptó una moto 0km de un hincha con plata'},
-        {label:'Rechazarlo, no quiero deberle nada a nadie', eff:{junta:5, barrio:-2}, log:'rechazó un regalo caro de un hincha'},
+        {label:'Aceptar el regalo', eff:{guita:10}, log:'aceptó una moto 0km de un hincha con plata'},
+        {label:'Rechazarlo, no quiero deberle nada a nadie', eff:{barrio:-2}, log:'rechazó un regalo caro de un hincha'},
       ]},
     { tag:'CURANDERA', text:`Una vecina del barrio te insiste en "sacarte el mal de ojo" con un huevo antes de un partido importante.`,
       choices:[
@@ -1109,18 +1148,18 @@ function eventsFor16to19(){
       ]},
     { tag:'PAPELES TRUCHOS', text:`Un representante te ofrece arreglar una doble ciudadanía trucha para que salgas más fácil a jugar afuera.`,
       choices:[
-        {label:'Aceptar el atajo', eff:{fama:4, junta:-8, cabeza:-3}, log:'aceptó arreglar una doble ciudadanía trucha'},
-        {label:'Hacer los papeles como corresponde, aunque tarde más', eff:{cabeza:4, junta:4}, log:'prefirió tramitar los papeles de forma correcta'},
+        {label:'Aceptar el atajo', eff:{fama:4, cabeza:-3}, log:'aceptó arreglar una doble ciudadanía trucha'},
+        {label:'Hacer los papeles como corresponde, aunque tarde más', eff:{cabeza:4}, log:'prefirió tramitar los papeles de forma correcta'},
       ]},
     { tag:'RETO VIRAL', text:`Los compañeros te desafían a un reto de redes sociales bastante arriesgado en pleno predio del club.`,
       choices:[
         {label:'Hacer el reto igual, filmarlo para las redes', eff:{fama:5, cabeza:-5, futbol:-2}, log:'hizo un reto viral arriesgado con los compañeros'},
-        {label:'Bajarme del reto', eff:{cabeza:3, junta:-2}, log:'se bajó de un reto viral arriesgado'},
+        {label:'Bajarme del reto', eff:{cabeza:3}, log:'se bajó de un reto viral arriesgado'},
       ]},
     { tag:'EL BOLSO', text:`Un conocido de la cuadra te pide que le guardes un bolso pesado "un par de días, sin abrirlo ni preguntar".`,
       choices:[
-        {label:'Guardarlo sin hacer preguntas', eff:{guita:6, junta:-10, cabeza:-4}, log:'guardó un bolso sospechoso sin hacer preguntas'},
-        {label:'Decir que no, mejor no meterse en líos', eff:{junta:6, barrio:-3}, log:'se negó a guardar un bolso sospechoso'},
+        {label:'Guardarlo sin hacer preguntas', eff:{guita:6, junta:-2, cabeza:-4}, log:'guardó un bolso sospechoso sin hacer preguntas'},
+        {label:'Decir que no, mejor no meterse en líos', eff:{junta:2, barrio:-3}, log:'se negó a guardar un bolso sospechoso'},
       ]},
     { tag:'JURADO SORPRESA', text:`Te invitan como jurado invitado de un programa de talentos barrial que se graba en el club.`,
       choices:[
@@ -1139,7 +1178,7 @@ function eventsFor16to19(){
       ]},
     { tag:'FAVOR ESCOLAR', text:`Un directivo del club te ofrece "arreglar" una materia del secundario para que no pierdas tiempo de entrenamiento.`,
       choices:[
-        {label:'Aceptar el arreglo', eff:{futbol:3, cabeza:-6, junta:-4}, log:'aceptó que le arreglaran una materia del secundario'},
+        {label:'Aceptar el arreglo', eff:{futbol:3, cabeza:-6}, log:'aceptó que le arreglaran una materia del secundario'},
         {label:'Rendir la materia como corresponde', eff:{cabeza:5}, log:'rindió una materia del secundario sin atajos'},
       ]},
     { tag:'PRIMERA ROJA', text:`Te expulsan por primera vez en un partido importante, con cámaras de televisión enfocándote en el túnel.`,
@@ -1149,13 +1188,13 @@ function eventsFor16to19(){
       ]},
     { tag:'PROMESA DEL BARRIO', text:`Un pibe más chico del barrio te empieza a imitar en todo, hasta en las cosas que no deberías repetir.`,
       choices:[
-        {label:'Divertirme con la imitación, es parte del folclore', eff:{barrio:5, opinion:-3}, log:'se divirtió con un pibe del barrio que lo imita en todo'},
-        {label:'Hablar con él para que no repita tus errores', eff:{barrio:6, opinion:4}, log:'aconsejó a un pibe del barrio que lo idolatra'},
+        {label:'Festejarle la imitación', eff:{barrio:6}, log:'le festejó la imitación a un pibe del barrio', special:'festejarImitacion'},
+        {label:'No alentarlo, pedirle que no repita tus errores', eff:{barrio:-5}, log:'no alentó a un pibe del barrio que lo imita'},
       ]},
     { tag:'PRUEBA EN OTRO CLUB', text:`Un club más grande te invita a una prueba, aunque eso implique dejar mal parado al que confió primero en vos.`,
       choices:[
-        {label:'Ir a probarme igual', eff:{futbol:5, junta:-5, barrio:-3}, log:'fue a probarse a otro club sin avisarle al que confió primero'},
-        {label:'Avisar primero a mi club actual', eff:{junta:5, cabeza:3}, log:'avisó a su club antes de probarse en otro lado'},
+        {label:'Ir a probarme igual', eff:{futbol:5, barrio:-3}, log:'fue a probarse a otro club sin avisarle al que confió primero'},
+        {label:'Avisar primero a mi club actual', eff:{cabeza:3}, log:'avisó a su club antes de probarse en otro lado'},
       ]},
     { tag:'PLATA DE LA PRIMERA CAMISETA', text:`Cobrás tu primer sueldo como profesional y no sabés bien en qué gastarlo.`,
       choices:[
@@ -1174,13 +1213,13 @@ function eventsFor16to19(){
       ]},
     { tag:'CASTIGO DEL DT', text:`El técnico te castiga sin jugar un partido importante por llegar tarde a un entrenamiento.`,
       choices:[
-        {label:'Protestar la decisión frente al plantel', eff:{fama:2, junta:-5, cabeza:-3}, log:'protestó un castigo del DT frente a todo el plantel'},
-        {label:'Aceptar el castigo y no llegar tarde nunca más', eff:{cabeza:5, junta:3}, log:'aceptó un castigo del DT sin protestar'},
+        {label:'Protestar la decisión frente al plantel', eff:{fama:2, cabeza:-3}, log:'protestó un castigo del DT frente a todo el plantel'},
+        {label:'Aceptar el castigo y no llegar tarde nunca más', eff:{cabeza:5}, log:'aceptó un castigo del DT sin protestar'},
       ]},
     { tag:'COMPAÑERO EN APRIETOS', text:`Un compañero de inferiores, con una familia que la está pasando mal, te pide plata prestada sin poder asegurarte cuándo te la devuelve.`,
       choices:[
         {label:'Prestarle la plata igual', eff:{barrio:5}, log:'le prestó plata a un compañero de inferiores en aprietos', special:'prestarACompanero'},
-        {label:'Decirle que por ahora no puede', eff:{junta:-3}, log:'no pudo prestarle plata a un compañero de inferiores en aprietos'},
+        {label:'Decirle que por ahora no puede', eff:{}, log:'no pudo prestarle plata a un compañero de inferiores en aprietos'},
       ]},
     { tag:'OFERTA DE MARCA CHICA', text:`Una marca deportiva chica del barrio te ofrece ropa gratis a cambio de que la uses en tus redes.`,
       choices:[
@@ -1199,7 +1238,7 @@ function eventsFor16to19(){
       ]},
     { tag:'PLATA PARA LOS BOTINES', text:`Un dirigente chico te ofrece pagarte los botines de marca a cambio de que lo menciones siempre en tus notas.`,
       choices:[
-        {label:'Aceptar el canje con el dirigente', eff:{guita:3, junta:-3}, log:'aceptó un canje de botines con un dirigente chico'},
+        {label:'Aceptar el canje con el dirigente', eff:{guita:3}, log:'aceptó un canje de botines con un dirigente chico'},
         {label:'Comprarlos con mi propia plata', eff:{guita:-3, cabeza:2}, log:'prefirió comprar sus botines con plata propia'},
       ]},
     { tag:'PRIMER SPONSOR', text:`Una casa de deportes chica del barrio te ofrece ser su imagen local a cambio de una suma modesta.`,
@@ -1210,7 +1249,7 @@ function eventsFor16to19(){
     { tag:'OJEADOR TRUCHO', text:`Un ojeador te ofrece arreglar tu partida de nacimiento para jugar un torneo de menores con un año de ventaja.`,
       choices:[
         {label:'Aceptar el arreglo', eff:{}, log:'aceptó arreglar su partida de nacimiento para jugar un torneo de menores', special:'ojeadorTruchoAceptar'},
-        {label:'Rechazarlo y competir en mi categoría real', eff:{cabeza:3, junta:3}, log:'rechazó arreglar su partida de nacimiento'},
+        {label:'Rechazarlo y competir en mi categoría real', eff:{cabeza:3}, log:'rechazó arreglar su partida de nacimiento'},
       ]},
     { tag:'PASTILLA MILAGROSA', text:`Antes de una final importante, un compañero mayor te ofrece una pastilla que "te hace rendir el doble".`,
       choices:[
@@ -1220,7 +1259,7 @@ function eventsFor16to19(){
     { tag:'PRIMER SUELDO', text:`Cobrás tu primer sueldo profesional.`,
       choices:[
         {label:'Comprás mercadería para el negocio de tu vieja', eff:{guita:-5, barrio:6}, log:'compró mercadería para el negocio de su vieja'},
-        {label:'Te comprás una heladera y la llenás de perfume', eff:{guita:-4, fama:2}, log:'se compró una heladera y la llenó de perfume'},
+        {label:'Te comprás una heladera y la llenás de perfume', eff:{guita:-4}, log:'se compró una heladera y la llenó de perfume para revender', special:'heladeraPerfumes'},
       ]},
   ];
 }
@@ -1228,8 +1267,8 @@ function eventsFor20to25(){
   return [
     { tag:'REPRESENTANTE', text:`Aparece un representante con contactos en el exterior. Promete pases a Europa, pero te pide exclusividad y un porcentaje raro.`,
       choices:[
-        {label:'Firmar, hay que arriesgar para crecer', eff:{fama:6, guita:5, junta:-6}, log:'firmó con un representante turbio'},
-        {label:'Buscar un representante con matrícula', eff:{fama:2, junta:6}, log:'eligió representación seria'},
+        {label:'Firmar, hay que arriesgar para crecer', eff:{fama:6, guita:5}, log:'firmó con un representante turbio'},
+        {label:'Buscar un representante con matrícula', eff:{fama:2}, log:'eligió representación seria'},
       ]},
     { tag:'NOCHE', text:`Después de un triunfo importante, la junta arma una previa que se estira hasta la madrugada de un miércoles con doble turno.`,
       choices:[
@@ -1238,7 +1277,7 @@ function eventsFor20to25(){
       ]},
     { tag:'DIRIGENCIA', text:`Un dirigente del club te empieza a llevar a comer seguido. Te insinúa que "más adelante" te va a necesitar para otra cosa, más allá de la cancha.`,
       choices:[
-        {label:'Seguirle la corriente, nunca se sabe', eff:{candidateable:10, junta:-3}, log:'empezó a codearse con la dirigencia'},
+        {label:'Seguirle la corriente, nunca se sabe', eff:{candidateable:10}, log:'empezó a codearse con la dirigencia'},
         {label:'Cortar por lo sano, yo solo juego al fútbol', eff:{barrio:4, candidateable:-2}, log:'evitó la rosca dirigencial'},
       ]},
     { tag:'LESIÓN', text:`Un cruce mal habido te deja parado varios meses. El kinesiólogo del club te arma un plan, pero la recuperación va a ser lenta.`,
@@ -1249,23 +1288,23 @@ function eventsFor20to25(){
     { tag:'NOTA EN CANCHA', text:`Después de un partidazo, la prensa te espera en la puerta del vestuario para la nota de rigor.`,
       choices:[
         {label:'Calentar el clásico que viene con alguna frase', eff:{fama:8, prensa:-6, opinion:-3}, log:'calentó el próximo partido en una nota post-partido'},
-        {label:'Elogiar al equipo y bajarle el tono a todo', eff:{prensa:7, junta:3}, log:'bajó el tono en una nota post-partido'},
+        {label:'Elogiar al equipo y bajarle el tono a todo', eff:{prensa:7}, log:'bajó el tono en una nota post-partido'},
         {label:'Hablar solo de lo futbolístico, sin polémica', eff:{prensa:4, fama:2}, log:'mantuvo la nota estrictamente futbolística'},
       ]},
     { tag:'PELEA CON EL DT', text:`Discutís fuerte con el técnico en pleno entrenamiento, delante de todo el plantel.`,
       choices:[
-        {label:'Plantarme y no bajar la cabeza', eff:{fama:3, junta:-5, cabeza:-3}, log:'se plantó ante el DT delante del plantel', special:'plantarseCuerpoTecnico'},
-        {label:'Pedir disculpas después del entrenamiento', eff:{junta:5, cabeza:3}, log:'pidió disculpas al DT tras la discusión'},
+        {label:'Plantarme y no bajar la cabeza', eff:{fama:3, cabeza:-3}, log:'se plantó ante el DT delante del plantel', special:'plantarseCuerpoTecnico'},
+        {label:'Pedir disculpas después del entrenamiento', eff:{cabeza:3}, log:'pidió disculpas al DT tras la discusión'},
       ]},
     { tag:'CASAMIENTO', text:`Después de años de novios, tu pareja de toda la vida te propone dar el paso y casarse.`,
       choices:[
-        {label:'Casarse, hacer una fiesta a lo grande', eff:{barrio:6, cabeza:5, guita:-6}, log:'se casó con su pareja de toda la vida'},
-        {label:'Postergarlo, todavía no es el momento', eff:{cabeza:-3}, log:'postergó el casamiento por la carrera'},
+        {label:'Casarse, hacer una fiesta a lo grande', eff:{}, log:'se casó con su pareja de toda la vida', special:'casamientoAceptar'},
+        {label:'Postergarlo, todavía no es el momento', eff:{}, log:'postergó el casamiento por la carrera', special:'casamientoRechazar'},
       ]},
     { tag:'EL DERBY', text:`Te toca jugar tu primer clásico grande de local, con el estadio repleto y la previa copada por los canales.`,
       choices:[
         {label:'Pedir la pelota y jugar con la casaca pesada', eff:{fama:7, cabeza:-3}, log:'se hizo cargo del primer clásico grande'},
-        {label:'Jugar simple, sin buscar el protagonismo', eff:{cabeza:5, junta:3}, log:'jugó simple en su primer clásico grande'},
+        {label:'Jugar simple, sin buscar el protagonismo', eff:{cabeza:5}, log:'jugó simple en su primer clásico grande'},
       ]},
     { tag:'CASA DE APUESTAS', text:`Una casa de apuestas deportivas te ofrece plata fuerte para ser la cara de su publicidad.`,
       choices:[
@@ -1274,7 +1313,7 @@ function eventsFor20to25(){
       ]},
     { tag:'FINANCIERA', text:`Un conocido de la barra te ofrece meter tus ahorros en una financiera que promete un interés imposible por mes.`,
       choices:[
-        {label:'Meter guita fuerte, hay que aprovechar', eff:{guita:-12, junta:-6}, log:'invirtió en una financiera con intereses imposibles'},
+        {label:'Meter guita fuerte, hay que aprovechar', eff:{guita:-12}, log:'invirtió en una financiera con intereses imposibles'},
         {label:'No meterse, eso huele raro', eff:{cabeza:3}, log:'evitó una financiera con intereses imposibles'},
       ]},
     { tag:'RECONOCIMIENTO', text:`Una mujer asegura públicamente que sos el padre de su hijo y pide que lo reconozcas.`,
@@ -1284,7 +1323,7 @@ function eventsFor20to25(){
       ]},
     { tag:'PROPUESTA RARA', text:`Un grupo se te acerca antes de un partido clave y te insinúa "bajar un poco el nivel" a cambio de una suma importante.`,
       choices:[
-        {label:'Escuchar la propuesta sin decir que no', eff:{guita:8, junta:-14, cabeza:-6}, log:'escuchó una propuesta para bajar el nivel a cambio de plata'},
+        {label:'Escuchar la propuesta sin decir que no', eff:{}, log:'aceptó bajar el nivel a cambio de plata en un partido clave', special:'arreglarPartido'},
         {label:'Cortar la conversación en el acto', eff:{cabeza:5, junta:6}, log:'cortó en seco una propuesta para arreglar un resultado'},
       ]},
     { tag:'CHOQUE FILMADO', text:`Chocás el auto último modelo en una esquina concurrida, y varios celulares te filman en el momento.`,
@@ -1294,7 +1333,7 @@ function eventsFor20to25(){
       ]},
     { tag:'CONTENIDO PICANTE', text:`Un influencer conocido te propone grabar contenido subido de tono para sus redes a cambio de plata.`,
       choices:[
-        {label:'Aceptar la propuesta', eff:{guita:8, opinion:-6, junta:-3}, log:'grabó contenido picante para un influencer'},
+        {label:'Aceptar la propuesta', eff:{guita:8}, log:'grabó contenido picante para un influencer', special:'contenidoPicanteAceptar'},
         {label:'Rechazarla, no me cierra', eff:{opinion:2}, log:'rechazó grabar contenido picante para un influencer'},
       ]},
     { tag:'REALITY DE PAREJAS', text:`Un canal te ofrece participar con tu pareja en un reality sobre la vida de futbolistas.`,
@@ -1309,7 +1348,7 @@ function eventsFor20to25(){
       ]},
     { tag:'ACUSACIÓN PÚBLICA', text:`Un excompañero te acusa en una nota de haberlo traicionado para quedarte con su lugar en el equipo.`,
       choices:[
-        {label:'Responderle fuerte en los medios', eff:{fama:4, junta:-6, opinion:-3}, log:'respondió fuerte a una acusación pública de un excompañero'},
+        {label:'Responderle fuerte en los medios', eff:{fama:4, opinion:-3}, log:'respondió fuerte a una acusación pública de un excompañero'},
         {label:'No entrar en polémica y seguir jugando', eff:{cabeza:4, prensa:2}, log:'evitó la polémica ante la acusación de un excompañero'},
       ]},
     { tag:'MANSIÓN', text:`Te comprás una mansión enorme en un country, bien lejos del barrio que te vio crecer.`,
@@ -1334,7 +1373,7 @@ function eventsFor20to25(){
       ]},
     { tag:'FIESTA CON QUEJAS', text:`Una fiesta en tu casa con la junta hasta la madrugada termina con varios vecinos llamando a la policía.`,
       choices:[
-        {label:'Seguir la fiesta igual', eff:{barrio:-6, cabeza:-4, junta:3}, log:'siguió una fiesta pese a las quejas de los vecinos'},
+        {label:'Seguir la fiesta igual', eff:{barrio:-6, cabeza:-4}, log:'siguió una fiesta pese a las quejas de los vecinos'},
         {label:'Cortarla apenas llegó la policía', eff:{barrio:2, cabeza:2}, log:'cortó una fiesta apenas se quejaron los vecinos'},
       ]},
     { tag:'EMBARAZO EN PRETEMPORADA', text:`Te enterás de que vas a ser padre justo en medio de la pretemporada más exigente de tu carrera.`,
@@ -1344,8 +1383,8 @@ function eventsFor20to25(){
       ]},
     { tag:'AGENTE FIFA', text:`Un agente con carnet FIFA te ofrece robarte del representante actual con promesas de contratos mejores en el exterior.`,
       choices:[
-        {label:'Cambiar de representante por la promesa', eff:{fama:4, junta:-6}, log:'cambió de representante por promesas de contratos en el exterior'},
-        {label:'Ser fiel al representante que lo llevó hasta ahí', eff:{junta:6}, log:'se mantuvo fiel a su representante de siempre'},
+        {label:'Cambiar de representante por la promesa', eff:{fama:4}, log:'cambió de representante por promesas de contratos en el exterior', special:'agenteFifaAceptar'},
+        {label:'Ser fiel al representante que lo llevó hasta ahí', eff:{}, log:'se mantuvo fiel a su representante de siempre'},
       ]},
     { tag:'DENUNCIA TRAS EL HOTEL', danger:true, clubReact:true, text:`Una mujer con la que pasaste una noche en un hotel te denuncia públicamente por violencia de género, asegurando que le pegaste.`,
       choices:[
@@ -1355,7 +1394,7 @@ function eventsFor20to25(){
       ]},
     { tag:'SINDICALISTA JOVEN', text:`Un dirigente gremial que recién empieza a hacerse conocido te busca para sumarte a sus actividades barriales.`,
       choices:[
-        {label:'Sumarme a sus actividades', eff:{candidateable:8, barrio:4, junta:-2}, log:'se sumó a actividades barriales de un sindicalista joven'},
+        {label:'Sumarme a sus actividades', eff:{candidateable:8, barrio:4}, log:'se sumó a actividades barriales de un sindicalista joven'},
         {label:'Mantener distancia por ahora', eff:{candidateable:-3}, log:'mantuvo distancia de un sindicalista joven'},
       ]},
     { tag:'PRÉSTAMO BANCARIO', text:`El banco te ofrece un préstamo enorme para comprar tu primera propiedad grande, con cuotas que parecen manejables mientras juegues bien.`,
@@ -1376,7 +1415,7 @@ function eventsFor20to25(){
     { tag:'DEUDA CON EL FISCO', text:`Un contador te avisa que hay un problema con tus impuestos de los últimos años y que hay que regularizarlo ya.`,
       choices:[
         {label:'Pagar todo de una para evitar problemas', eff:{guita:-9, cabeza:3}, log:'regularizó de una una deuda con el fisco'},
-        {label:'Buscar la forma de pagar lo mínimo posible', eff:{guita:-2, junta:-3}, log:'buscó pagar lo mínimo posible en una deuda con el fisco'},
+        {label:'Buscar la forma de pagar lo mínimo posible', eff:{guita:-2}, log:'buscó pagar lo mínimo posible en una deuda con el fisco'},
       ]},
     { tag:'PELEA DE PAREJA MEDIÁTICA', text:`Una pelea de pareja en la puerta de un boliche queda filmada por varios celulares y se hace viral en minutos.`,
       choices:[
@@ -1406,22 +1445,22 @@ function eventsFor20to25(){
     { tag:'PROPUESTA DE LA PERIODISTA', text:`Una periodista te ofrece una noche con ella si le contás los quilombos del vestuario que involucran al titular en tu posición.`,
       choices:[
         {label:'Aceptar', eff:{}, log:'aceptó la propuesta de la periodista y le contó los quilombos del vestuario', special:'periodistaAceptar'},
-        {label:'Rechazar', eff:{}, log:'rechazó la propuesta de la periodista y siguió con su vida siendo suplente'},
+        {label:'Rechazar', eff:{}, log:'rechazó la propuesta de la periodista y siguió con su vida siendo suplente', special:'periodistaRechazar'},
       ]},
     { tag:'EL DT TE PIDE PLATA', text:`El DT te pide plata para ser titular, sino comés banco todo el año.`,
       choices:[
-        {label:'Le das', eff:{guita:-6, futbol:3, junta:-8}, log:'le dio plata al DT para ser titular', setFlag:'coimeoAlDT'},
-        {label:'Suplente pero con dignidad', eff:{cabeza:4, opinion:2, junta:4}, log:'se quedó de suplente con dignidad, sin pagarle al DT'},
+        {label:'Le das', eff:{guita:-6, futbol:3}, log:'le dio plata al DT para ser titular', setFlag:'coimeoAlDT'},
+        {label:'Suplente pero con dignidad', eff:{cabeza:4, opinion:2}, log:'se quedó de suplente con dignidad, sin pagarle al DT'},
       ]},
     { tag:'CAÑO EN LA PRÁCTICA', text:`Un compañero te tira un caño en una práctica.`,
       choices:[
         {label:'Cagarlo a palos', eff:{}, log:'se agarró a piñas con un compañero después de un caño en la práctica', special:'peleaCano'},
-        {label:'Dejarla pasar y quedar como un boludo', eff:{cabeza:2, junta:2, opinion:-2}, log:'dejó pasar un caño en la práctica y quedó como un boludo'},
+        {label:'Dejarla pasar y quedar como un boludo', eff:{cabeza:2, opinion:-2}, log:'dejó pasar un caño en la práctica y quedó como un boludo'},
       ]},
     { tag:'EXAMEN AJENO', text:`Un compañero te pide que des el control antidoping por él porque está complicado con unos análisis.`,
       choices:[
         {label:'Hacerle el favor', eff:{}, log:'aceptó dar un control antidoping en lugar de un compañero', special:'examenAjeno'},
-        {label:'Negarme', eff:{junta:-4}, log:'se negó a dar un control antidoping por un compañero'},
+        {label:'Negarme', eff:{}, log:'se negó a dar un control antidoping por un compañero'},
       ]},
     { tag:'CASA DE CITAS TOP', text:`Una casa de citas de lujo te ofrece el triple de plata que cualquier sponsor si sos "la cara" de su local.`,
       choices:[
@@ -1439,12 +1478,12 @@ function eventsFor26to32(){
       ]},
     { tag:'DOPING', text:`Antes del clásico, te avisan que en el próximo control antidoping te puede complicar algo que tomaste en una previa. Todavía estás a tiempo de evitar salir a jugar ese día.`,
       choices:[
-        {label:'Jugar igual, a ver qué pasa', eff:{cabeza:-10, junta:-6}, log:'jugó pese al riesgo', special:'chanceDoping'},
+        {label:'Jugar igual, a ver qué pasa', eff:{cabeza:-10}, log:'jugó pese al riesgo', special:'chanceDoping'},
         {label:'Pedir estar afuera de la citación con una excusa', eff:{fama:-4, cabeza:4}, log:'evitó el problema a tiempo'},
       ]},
     { tag:'MEDIOS', text:`Un canal de streaming te invita a un móvil en vivo para hablar de tu presente. La producción te insinúa que "cuanto más picante, más rating".`,
       choices:[
-        {label:'Tirar frases fuertes, total da que hablar', eff:{fama:10, cabeza:-4, junta:-3, prensa:-8}, log:'se hizo mediático a los tiros'},
+        {label:'Tirar frases fuertes, total da que hablar', eff:{fama:10, cabeza:-4, prensa:-8}, log:'se hizo mediático a los tiros'},
         {label:'Responder con perfil bajo', eff:{fama:2, barrio:4, prensa:6}, log:'mantuvo el perfil bajo con la prensa'},
       ]},
     { tag:'DENUNCIA', danger:true, text:`Una mujer con la que pasaste una noche en un hotel hace pública una denuncia por violencia de género. Tu representante te llama en las próximas horas con dos caminos posibles.`,
@@ -1454,7 +1493,7 @@ function eventsFor26to32(){
       ]},
     { tag:'REUNIÓN', text:`Un puntero de la zona te invita a una asado con "gente que te puede ayudar el día de mañana". Vas a estar rodeado de dirigentes de un partido político.`,
       choices:[
-        {label:'Ir, escuchar y ver qué se puede sacar', eff:{candidateable:15, junta:-4}, log:'aceptó la primera reunión política'},
+        {label:'Ir, escuchar y ver qué se puede sacar', eff:{candidateable:15}, log:'aceptó la primera reunión política'},
         {label:'Rechazar la invitación amablemente', eff:{candidateable:-5, barrio:3}, log:'declinó la rosca por ahora'},
       ]},
     { tag:'LA BARRA', text:`Después del partido, la barra brava te invita a un asado "solo para los que ponen huevo". Te insisten en que faltar sería una falta de respeto.`,
@@ -1479,7 +1518,7 @@ function eventsFor26to32(){
       ]},
     { tag:'ARREGLO GRANDE', text:`Te vuelven a insistir, esta vez con una cifra mucho más grande, para "ayudar" con el resultado de un partido clave.`,
       choices:[
-        {label:'Aceptar la plata grande', eff:{guita:18, junta:-16, opinion:-4}, log:'aceptó una suma grande para arreglar un resultado'},
+        {label:'Aceptar la plata grande', eff:{}, log:'aceptó una suma grande para arreglar un resultado', special:'arreglarPartidoGrande'},
         {label:'Denunciarlo ante la dirigencia del club', eff:{opinion:8, junta:6, barrio:4}, log:'denunció ante el club un intento de arreglo de partido'},
       ]},
     { tag:'FINANCIERA GRANDE', text:`Un empresario te ofrece prestar tu nombre y tu cara para una financiera que promete rendimientos altísimos a los hinchas.`,
@@ -1494,12 +1533,12 @@ function eventsFor26to32(){
       ]},
     { tag:'TESTAFERRO', text:`Un empresario amigo te pide poner una propiedad a tu nombre "por un tema impositivo", sin dar muchas explicaciones.`,
       choices:[
-        {label:'Hacerle el favor', eff:{guita:6, junta:-12}, log:'puso una propiedad a su nombre como favor a un empresario'},
-        {label:'Decirle que consulte con un abogado, no conmigo', eff:{junta:5}, log:'evitó ser testaferro de un empresario amigo'},
+        {label:'Hacerle el favor', eff:{guita:6}, log:'puso una propiedad a su nombre como favor a un empresario'},
+        {label:'Decirle que consulte con un abogado, no conmigo', eff:{}, log:'evitó ser testaferro de un empresario amigo'},
       ]},
     { tag:'VIAJE DE LUJO', text:`Un empresario te invita a un viaje de lujo con todos los gastos pagos, en medio de rumores de una causa judicial en su contra.`,
       choices:[
-        {label:'Aceptar el viaje igual', eff:{guita:8, opinion:-6, junta:-6}, log:'aceptó un viaje de lujo de un empresario bajo sospecha'},
+        {label:'Aceptar el viaje igual', eff:{guita:8, opinion:-6}, log:'aceptó un viaje de lujo de un empresario bajo sospecha'},
         {label:'Rechazarlo por las dudas', eff:{opinion:3}, log:'rechazó un viaje de lujo de un empresario bajo sospecha'},
       ]},
     { tag:'TATUAJE FACIAL', text:`Te hacés un tatuaje enorme en la cara y la noticia tapa cualquier análisis futbolístico esa semana.`,
@@ -1519,18 +1558,23 @@ function eventsFor26to32(){
       ]},
     { tag:'FIESTA VIP', text:`Una fiesta VIP con gente pesada del ambiente termina con la policía golpeando la puerta a la madrugada.`,
       choices:[
-        {label:'Quedarme hasta el final de la fiesta', eff:{junta:-8, opinion:-6, barrio:3}, log:'se quedó hasta el final de una fiesta VIP que terminó mal'},
-        {label:'Rajar apenas se complicó todo', eff:{cabeza:3, junta:3}, log:'se fue a tiempo de una fiesta VIP que terminó mal'},
+        {label:'Quedarme hasta el final de la fiesta', eff:{opinion:-6, barrio:3}, log:'se quedó hasta el final de una fiesta VIP que terminó mal'},
+        {label:'Rajar apenas se complicó todo', eff:{cabeza:3}, log:'se fue a tiempo de una fiesta VIP que terminó mal'},
       ]},
     { tag:'SOCIEDAD DUDOSA', text:`Un empresario amigo te propone ser socio de un local nuevo que, meses después, aparece envuelto en una causa por lavado de dinero.`,
       choices:[
-        {label:'Meterse de socio igual, la propuesta es tentadora', eff:{guita:10, junta:-10, opinion:-4}, log:'se hizo socio de un local que terminó envuelto en una causa por lavado'},
-        {label:'Rechazar la sociedad', eff:{junta:5}, log:'rechazó ser socio de un negocio dudoso'},
+        {label:'Meterse de socio igual, la propuesta es tentadora', eff:{guita:10, opinion:-4}, log:'se hizo socio de un local que terminó envuelto en una causa por lavado'},
+        {label:'Rechazar la sociedad', eff:{}, log:'rechazó ser socio de un negocio dudoso'},
+      ]},
+    { tag:'OFERTA DE INVERSIÓN', text:`Un extraño con pinta de buen tipo, poco pelo y de un gran "corazón" te ofrece invertir y ser la cara visible de un curso de coaching y liderazgo con ganancias de hasta un 10% mensual en criptomonedas.`,
+      choices:[
+        {label:'Pese a las dudas, aceptar el trato e invertir en el curso', eff:{}, log:'aceptó invertir en un curso de coaching y liderazgo con ganancias en criptomonedas', special:'inversionCriptoAceptar', setFlag:'ofertaCriptoRecibida'},
+        {label:'No aceptar la oferta por el momento', eff:{}, log:'rechazó la inversión en criptomonedas, por el momento', setFlag:'ofertaCriptoRecibida'},
       ]},
     { tag:'VUELTA OLÍMPICA', danger:true, text:`Saliste campeón y con los muchachos quieren salir a dar una vuelta. Te preguntan si estás para manejar.`,
       choices:[
         {label:'Sí', eff:{}, log:'salió a manejar después de festejar el título con los muchachos', special:'manejarBorracho'},
-        {label:'No', eff:{junta:-5}, log:'no manejó, pero los compañeros no lo vieron igual después de eso'},
+        {label:'No', eff:{}, log:'no manejó, pero los compañeros no lo vieron igual después de eso'},
       ]},
     { tag:'COPA POTRERO', text:`Te ofrecen jugar la Copa Potrero, un campeonato de streamers.`,
       choices:[
@@ -1550,12 +1594,12 @@ function eventsFor26to32(){
       ]},
     { tag:'TESTIGO FALSO', text:`Un amigo de toda la vida te pide que declares algo que no es cierto para ayudarlo en una causa judicial.`,
       choices:[
-        {label:'Declarar lo que me pide, es mi amigo', eff:{junta:-10, opinion:-4}, log:'declaró en falso para ayudar a un amigo'},
-        {label:'Negarme, no puedo mentirle a la Justicia', eff:{junta:6, opinion:3}, log:'se negó a declarar en falso por un amigo'},
+        {label:'Declarar lo que me pide, es mi amigo', eff:{opinion:-4}, log:'declaró en falso para ayudar a un amigo'},
+        {label:'Negarme, no puedo mentirle a la Justicia', eff:{opinion:3}, log:'se negó a declarar en falso por un amigo'},
       ]},
     { tag:'DERECHOS DE IMAGEN', text:`Un fondo extranjero te ofrece comprar tus derechos de imagen completos por una cifra enorme, con una letra chica que nadie te explica bien.`,
       choices:[
-        {label:'Firmar sin leer todo, la cifra es tentadora', eff:{guita:20, junta:-4}, log:'vendió sus derechos de imagen sin leer bien el contrato'},
+        {label:'Firmar sin leer todo, la cifra es tentadora', eff:{guita:20}, log:'vendió sus derechos de imagen sin leer bien el contrato'},
         {label:'Llevarlo a un abogado de confianza primero', eff:{guita:6, cabeza:3}, log:'revisó con un abogado antes de vender sus derechos de imagen'},
       ]},
     { tag:'CULTO BARRIAL', text:`Un grupo del barrio empieza a venerarte casi como un santo y te piden que "bendigas" a sus enfermos.`,
@@ -1570,23 +1614,23 @@ function eventsFor26to32(){
       ]},
     { tag:'FAVOR TURBIO DE UN COMPAÑERO', text:`Un compañero te pide que le cubras la coartada ante el DT por una salida no autorizada, a cambio de una buena plata.`,
       choices:[
-        {label:'Cubrirlo a cambio de la plata', eff:{guita:8, junta:-6}, log:'cubrió a un compañero ante el DT a cambio de plata'},
-        {label:'Negarme a mentir por él', eff:{junta:5}, log:'se negó a cubrir a un compañero con una mentira'},
+        {label:'Cubrirlo a cambio de la plata', eff:{guita:8}, log:'cubrió a un compañero ante el DT a cambio de plata'},
+        {label:'Negarme a mentir por él', eff:{}, log:'se negó a cubrir a un compañero con una mentira'},
       ]},
     { tag:'CURSO DE DT TEMPRANO', text:`El club te ofrece empezar ya el curso de entrenador, a la par de tu mejor momento como jugador.`,
       choices:[
-        {label:'Anotarme, nunca es temprano para pensar en el mañana', eff:{cabeza:6, junta:3}, log:'empezó de forma temprana el curso de DT', special:'abreDT'},
+        {label:'Anotarme, nunca es temprano para pensar en el mañana', eff:{cabeza:6}, log:'empezó de forma temprana el curso de DT', special:'abreDT'},
         {label:'Enfocarme solo en jugar por ahora', eff:{futbol:3}, log:'prefirió enfocarse solo en jugar en vez de empezar el curso de DT'},
       ]},
     { tag:'CAFÉ CON EL DUEÑO DEL MEDIO', text:`El dueño de uno de los medios más grandes del país te invita a un café "para hablar de cosas que no tienen nada que ver con la pelota".`,
       choices:[
-        {label:'Aceptar la invitación', eff:{candidateable:14, prensa:6, junta:-5}, log:'aceptó un café con el dueño de un medio importante para hablar de política', special:'cafeEmpresarioMediatico', setFlag:'aceptoEmpresarioMediatico'},
-        {label:'No aceptar, prefiero no meterme en eso', eff:{candidateable:-6, junta:4}, log:'rechazó una reunión con el dueño de un medio importante'},
+        {label:'Aceptar la invitación', eff:{candidateable:14, prensa:6}, log:'aceptó un café con el dueño de un medio importante para hablar de política', special:'cafeEmpresarioMediatico', setFlag:'aceptoEmpresarioMediatico'},
+        {label:'No aceptar, prefiero no meterme en eso', eff:{candidateable:-6}, log:'rechazó una reunión con el dueño de un medio importante'},
       ]},
     { tag:'PRESIÓN DE UN GREMIO', text:`Un gremio grande te pide que participes de un acto público de apoyo a cambio de sostenerte políticamente en el futuro.`,
       choices:[
-        {label:'Participar del acto público', eff:{candidateable:10, junta:-4, opinion:-3}, log:'participó de un acto público de apoyo a un gremio'},
-        {label:'Rechazar la invitación', eff:{candidateable:-4, junta:4}, log:'rechazó participar de un acto público gremial'},
+        {label:'Participar del acto público', eff:{candidateable:10, opinion:-3}, log:'participó de un acto público de apoyo a un gremio'},
+        {label:'Rechazar la invitación', eff:{candidateable:-4}, log:'rechazó participar de un acto público gremial'},
       ]},
     { tag:'CRISIS DE PAREJA', text:`Tu relación de años entra en una crisis fuerte por el ritmo de vida que te da la carrera.`,
       choices:[
@@ -1600,8 +1644,8 @@ function eventsFor26to32(){
       ]},
     { tag:'PELEA CON EL CUERPO TÉCNICO', text:`Discutís fuerte con el preparador físico por los métodos de entrenamiento que te está exigiendo.`,
       choices:[
-        {label:'Plantarme y entrenar a mi manera', eff:{futbol:2, junta:-5}, log:'se plantó ante el cuerpo técnico y entrenó a su manera', special:'plantarseCuerpoTecnico'},
-        {label:'Confiar en el método aunque no me guste', eff:{futbol:4, junta:3}, log:'confió en el método del cuerpo técnico pese a las dudas'},
+        {label:'Plantarme y entrenar a mi manera', eff:{futbol:2}, log:'se plantó ante el cuerpo técnico y entrenó a su manera', special:'plantarseCuerpoTecnico'},
+        {label:'Confiar en el método aunque no me guste', eff:{futbol:4}, log:'confió en el método del cuerpo técnico pese a las dudas'},
       ]},
     { tag:'PROPUESTA DE UN FONDO', text:`Un fondo de inversión te ofrece comprar un porcentaje de tu próximo pase a cambio de plata en el momento.`,
       choices:[
@@ -1634,7 +1678,7 @@ function eventsFor33plus(){
       ]},
     { tag:'FUTURO', text:`El club te ofrece empezar el curso de DT mientras seguís jugando algunos partidos por semana.`,
       choices:[
-        {label:'Anotarme, hay que pensar en el después', eff:{cabeza:8, junta:4}, log:'empezó el curso de DT', special:'abreDT'},
+        {label:'Anotarme, hay que pensar en el después', eff:{cabeza:8}, log:'empezó el curso de DT', special:'abreDT'},
         {label:'Todavía no, quiero seguir jugando a full', eff:{futbol:4, cabeza:-2}, log:'siguió enfocado solo en jugar'},
       ]},
     { tag:'BALANCE', text:`Un programa central te invita a hacer un repaso de toda tu carrera, con motivo del cierre que se viene.`,
@@ -1649,7 +1693,7 @@ function eventsFor33plus(){
       ]},
     { tag:'INVERSIÓN', text:`Un amigo de toda la vida te propone invertir tus ahorros en un negocio que promete el doble en pocos meses.`,
       choices:[
-        {label:'Invertir fuerte, hay que arriesgar', eff:{guita:-15, junta:-4}, log:'invirtió sus ahorros en un negocio arriesgado de un amigo'},
+        {label:'Invertir fuerte, hay que arriesgar', eff:{guita:-15}, log:'invirtió sus ahorros en un negocio arriesgado de un amigo'},
         {label:'Guardar la plata, no me cierra el negocio', eff:{cabeza:3}, log:'no invirtió en el negocio de un amigo'},
       ]},
     { tag:'ÚLTIMA LESIÓN', danger:true, text:`Una lesión te tiene varios meses afuera y los médicos te avisan que una más así puede ser la definitiva.`,
@@ -1669,12 +1713,12 @@ function eventsFor33plus(){
       ]},
     { tag:'LIBRO PICANTE', text:`Una editorial te ofrece una cifra importante por escribir un libro contando intimidades picantes del vestuario.`,
       choices:[
-        {label:'Escribirlo sin filtro, la plata que ofrecen es buena', eff:{guita:14, junta:-10, fama:5}, log:'escribió un libro picante contando intimidades del vestuario'},
-        {label:'Rechazar la oferta, hay códigos que no se rompen', eff:{junta:6}, log:'rechazó escribir un libro picante sobre el vestuario'},
+        {label:'Escribirlo sin filtro, la plata que ofrecen es buena', eff:{guita:14, fama:5}, log:'escribió un libro picante contando intimidades del vestuario'},
+        {label:'Rechazar la oferta, hay códigos que no se rompen', eff:{}, log:'rechazó escribir un libro picante sobre el vestuario'},
       ]},
     { tag:'PODCAST PROPIO', text:`Te ofrecen un podcast con tu nombre, pero la producción te pide "tirar algún centro" contra excompañeros para el rating.`,
       choices:[
-        {label:'Tirar alguna que otra polémica', eff:{fama:6, junta:-8, opinion:-3}, log:'tiró polémicas contra excompañeros en su propio podcast'},
+        {label:'Tirar alguna que otra polémica', eff:{fama:6, opinion:-3}, log:'tiró polémicas contra excompañeros en su propio podcast'},
         {label:'Hacer el podcast sin polémicas', eff:{prensa:4, fama:2}, log:'hizo un podcast propio sin meterse con nadie'},
       ]},
     { tag:'NEGOCIO FAMILIAR', text:`Se arma una pelea fuerte con un hermano por cómo se maneja el negocio familiar armado con la plata del fútbol.`,
@@ -1684,7 +1728,7 @@ function eventsFor33plus(){
       ]},
     { tag:'VIEJO TESTAFERRO', text:`Reaparece un viejo conocido, aquel al que le hiciste un favor turbio hace años, pidiendo silencio a cambio de plata.`,
       choices:[
-        {label:'Pagarle para que no hable', eff:{guita:-14, junta:-6}, log:'pagó a un viejo conocido para que no hable de un favor turbio del pasado'},
+        {label:'Pagarle para que no hable', eff:{guita:-14}, log:'pagó a un viejo conocido para que no hable de un favor turbio del pasado'},
         {label:'No pagarle nada y bancarse lo que pase', eff:{opinion:-4, cabeza:4}, log:'se negó a pagar por el silencio de un viejo conocido'},
       ]},
     { tag:'EX PAREJA MEDIÁTICA', text:`Una ex pareja de hace años sale en televisión a contar detalles íntimos de la relación que tuvieron.`,
@@ -1744,8 +1788,8 @@ function eventsFor33plus(){
       ]},
     { tag:'OFERTA DE COMENTARISTA', text:`Un canal te ofrece ser comentarista estrella, pero te piden opinar sin filtro sobre tus excompañeros en actividad.`,
       choices:[
-        {label:'Aceptar y tirar munición gruesa', eff:{fama:6, junta:-8, prensa:-2}, log:'aceptó ser comentarista sin filtro contra excompañeros'},
-        {label:'Aceptar pero cuidando a los excompañeros', eff:{junta:4, prensa:3}, log:'aceptó ser comentarista cuidando a sus excompañeros'},
+        {label:'Aceptar y tirar munición gruesa', eff:{fama:6, prensa:-2}, log:'aceptó ser comentarista sin filtro contra excompañeros'},
+        {label:'Aceptar pero cuidando a los excompañeros', eff:{prensa:3}, log:'aceptó ser comentarista cuidando a sus excompañeros'},
       ]},
     { tag:'CURSO DE DT TARDÍO', text:`Todavía estás a tiempo de anotarte al curso de entrenador antes de que se te complique el cuerpo del todo.`,
       choices:[
@@ -1754,7 +1798,7 @@ function eventsFor33plus(){
       ]},
     { tag:'MESA CHICA POLÍTICA', text:`Te invitan a una "mesa chica" de un espacio político, algo mucho más íntimo y comprometido que una simple reunión.`,
       choices:[
-        {label:'Sumarme a la mesa chica', eff:{candidateable:16, junta:-6, opinion:-3}, log:'se sumó a la mesa chica de un espacio político'},
+        {label:'Sumarme a la mesa chica', eff:{candidateable:16, opinion:-3}, log:'se sumó a la mesa chica de un espacio político'},
         {label:'Ir solo como invitado, sin comprometerme', eff:{candidateable:4}, log:'fue como invitado a una mesa chica política sin comprometerse'},
       ]},
     { tag:'PENSIÓN', text:`Empezás a averiguar los trámites para tu jubilación como futbolista profesional, algo que te hace caer la ficha de los años.`,
@@ -1800,7 +1844,7 @@ function eventsFor33plus(){
     { tag:'INSINUACIÓN DE LA NOVIA DE UN COMPAÑERO', text:`La novia de un compañero del plantel te empieza a mandar mensajes con doble sentido cada vez más directos.`,
       choices:[
         {label:'Seguirle el juego', eff:{fama:2}, log:'le siguió el juego a la novia de un compañero', special:'chanceDescubrenInfidelidad'},
-        {label:'Cortar la situación de raíz', eff:{junta:4}, log:'cortó de raíz una insinuación de la novia de un compañero'},
+        {label:'Cortar la situación de raíz', eff:{}, log:'cortó de raíz una insinuación de la novia de un compañero'},
       ]},
     { tag:'CHEQUE SIN FONDOS', text:`Un empresario amigo te paga con un cheque que rebota justo cuando más necesitás la plata.`,
       choices:[
@@ -1827,6 +1871,7 @@ function simularTemporada(){
   const curva = edadCurvaFutbol(state.age);
   const ajusteCurva = curva > 0 ? curva * state.potencial.mult : curva;
   state.stats.futbol = clamp(Math.min(state.potencial.cap, state.stats.futbol + ajusteCurva));
+  if(state.stats.futbol > state.futbolMaximo) state.futbolMaximo = state.stats.futbol;
   // Un poco de resiliencia natural: si la Cabeza viene golpeada, hay algo de recuperación
   // orgánica temporada a temporada (madurar, aprender de los errores), no todo es cuesta abajo.
   if(state.stats.cabeza < 55){
@@ -1835,10 +1880,12 @@ function simularTemporada(){
   // Las decisiones graves (denuncias, escándalos, lesiones) dejan un efecto temporal sobre
   // el nivel real de esa temporada y los minutos que vas a sumar, más allá del stat de Fútbol.
   const fEfectivo = clamp(state.stats.futbol + state.modFutbolTemporal);
-  const partidos = Math.max(0, Math.min(38, Math.round(rand(4,9) + (fEfectivo/100)*30 + state.modPartidosTemporal)));
+  // La relación con el plantel también pesa: bien parado sumás más, aislado sumás mucho menos.
+  const plantelFactor = 0.55 + (state.stats.plantel/100) * 0.9;
+  const partidos = Math.max(0, Math.min(38, Math.round((rand(4,9) + (fEfectivo/100)*30) * plantelFactor + state.modPartidosTemporal)));
   const factorMin = partidos/38;
-  const goles = Math.max(0, Math.round(factorMin * (fEfectivo/100) * rand(6,16)));
-  const asistencias = Math.max(0, Math.round(factorMin * (fEfectivo/100) * rand(4,12)));
+  const goles = Math.max(0, Math.round(factorMin * (fEfectivo/100) * rand(6,16) * plantelFactor));
+  const asistencias = Math.max(0, Math.round(factorMin * (fEfectivo/100) * rand(4,12) * plantelFactor));
   state.temporadaStats = {partidos, goles, asistencias};
   // Los modificadores se atenúan con el tiempo: el golpe (o el envión) no dura para siempre.
   state.modFutbolTemporal = Math.round(state.modFutbolTemporal * 0.35);
@@ -1846,6 +1893,23 @@ function simularTemporada(){
   state.carreraPJ += partidos;
   state.carreraGoles += goles;
   state.carreraAsistencias += asistencias;
+
+  // Chance de salir campeón esa temporada, según el peso del club y tu nivel.
+  if(state.club.d !== 'LIBRE'){
+    let probTitulo = 0.02;
+    if(state.club.d === 'EU') probTitulo = state.club.t===0 ? 0.16 : (state.club.t===0.5 ? 0.08 : 0.03);
+    else if(state.club.d === 'MX') probTitulo = 0.06;
+    else if(state.club.d === 'PD'){
+      if(CLUBES_ELITE_ARG.includes(state.club.n)) probTitulo = 0.14;
+      else if(CLUBES_GRANDES_ARG.includes(state.club.n)) probTitulo = 0.07;
+      else probTitulo = 0.03;
+    } else probTitulo = 0.015;
+    probTitulo *= (0.5 + fEfectivo/100);
+    if(Math.random() < probTitulo){
+      state.carreraTitulos += 1;
+      addLog(`salió campeón con ${state.club.n}`);
+    }
+  }
   return state.temporadaStats;
 }
 
@@ -1864,6 +1928,12 @@ function nombreLiga(club){
   if(club.d==='EU') return 'Europa';
   if(club.d==='LIBRE') return 'Sin club';
   return 'Espacio Político';
+}
+
+// Cada vez que cambiás de club, arrancás una relación nueva con el plantel (50 puntos).
+function cambiarClub(nuevoClub){
+  state.club = nuevoClub;
+  state.stats.plantel = 50;
 }
 
 function contractOfferEvent(){
@@ -1906,11 +1976,17 @@ function contractOfferEvent(){
     const c2 = randomClub(rango.min, Math.min(5, rango.max+1), ['PD','PN']);
     ofertas.push({ club:c2, years: Math.round(rand(1,3)), salary: computeSalary(c2, futbol, state.age) });
 
-    // Ofertas del exterior: solo si el nivel futbolístico y la Junta acompañan.
-    if(!sinClub && futbol > 68 && state.stats.junta >= 50 && Math.random() < 0.4){
+    // Ofertas del exterior: el nivel y la Junta abren la puerta; un agente turbio la empuja
+    // más todavía, y un arreglo de partido descubierto la cierra bastante.
+    let chanceEuropa = 0.6;
+    if(state.flags.agenteFifaTurbio) chanceEuropa = 0.85;
+    if(state.flags.arregloPartidoHecho) chanceEuropa *= 0.3;
+    if(!sinClub && futbol > 62 && state.stats.junta >= 45 && Math.random() < chanceEuropa){
       const rangoEU = futbol >= 82 ? {min:0, max:0.5} : {min:0.5, max:1.5};
       const cEU = randomClub(rangoEU.min, rangoEU.max, ['EU']);
-      ofertas.push({ club:cEU, years: Math.round(rand(2,5)), salary: computeSalary(cEU, futbol, state.age) });
+      const irregular = !!state.flags.agenteFifaTurbio;
+      ofertas.push({ club:cEU, years: Math.round(rand(2,5)), salary: computeSalary(cEU, futbol, state.age), irregular });
+      state.flags.agenteFifaTurbio = false;
     }
   }
 
@@ -1957,6 +2033,28 @@ function prestamoEvent(){
   };
 }
 
+function finDeCicloEvent(){
+  const clubCualquiera = randomClub(1, 5, ['PD','PN']);
+  const years = Math.round(rand(1,3));
+  const salary = computeSalary(clubCualquiera, state.stats.futbol, state.age);
+  return {
+    tag:'FIN DE CICLO',
+    text:`Fin de ciclo. Tu club decidió no renovarte. Elegí el próximo paso de tu carrera.`,
+    choices:[
+      {
+        label:`Oferta de un club cualquiera de Argentina — ${clubCualquiera.n} (${nombreLiga(clubCualquiera)}) — ${years} año${years===1?'':'s'} — ${fmtUSD(salary)}/año`,
+        eff:{}, log:`fin de ciclo: firmó con ${clubCualquiera.n}`,
+        special:'firmarContrato', offerData:{club:clubCualquiera, years, salary},
+      },
+      {
+        label:'Cantilo FC. No jugás, te borraron',
+        eff:{}, log:'fin de ciclo: lo mandaron a entrenar aparte, sin sumar minutos',
+        special:'finDeCicloCantilo',
+      },
+    ]
+  };
+}
+
 function ofertaMexicoEvent(){
   const clubMx = randomClub(1.8, 1.8, ['MX']);
   const years = Math.round(rand(2,4));
@@ -1966,7 +2064,7 @@ function ofertaMexicoEvent(){
     text:`Te llega una propuesta fuerte de ${clubMx.n}, de la Liga MX: buen contrato y un fútbol competitivo, pero lejos de todo lo conocido.`,
     choices:[
       {label:`Aceptar e irme a ${clubMx.n} — ${years} años — ${fmtUSD(salary)}/año`, eff:{}, log:`aceptó la oferta de ${clubMx.n} y se fue a jugar a México`, special:'firmarContrato', offerData:{club:clubMx, years, salary}},
-      {label:'Rechazar la oferta y quedarme donde estoy', eff:{junta:2}, log:'rechazó una oferta fuerte de México'},
+      {label:'Rechazar la oferta y quedarme donde estoy', eff:{}, log:'rechazó una oferta fuerte de México'},
     ]
   };
 }
@@ -1980,7 +2078,7 @@ function ejecutarDeportacion(){
     const rango = tierParaNivel(state.stats.futbol);
     nuevoClub = randomClub(Math.min(5, rango.max+1), 5, ['PD','PN']);
   }
-  state.club = nuevoClub;
+  cambiarClub(nuevoClub);
   state.contract = { yearsLeft: Math.round(rand(1,2)), salaryPerYear: computeSalary(nuevoClub, state.stats.futbol, state.age) };
   state.prestamo = null;
   addLog(`fue deportado de Europa por la situación y tuvo que volver a jugar a ${aMexico ? 'México' : 'Argentina'}`);
@@ -2004,7 +2102,7 @@ function eventsForEuropa(){
     eventos.push(
       { tag:'CURSO DE IDIOMA', text:`El club te ofrece clases intensivas de ${idioma} para que puedas integrarte mejor al plantel.`,
         choices:[
-          {label:'Tomarlo en serio y estudiar de verdad', eff:{cabeza:4, junta:4, prensa:3}, log:`se tomó en serio el curso de ${idioma}`, setFlag:'aprendioIdiomaEuropa'},
+          {label:'Tomarlo en serio y estudiar de verdad', eff:{cabeza:4, prensa:3}, log:`se tomó en serio el curso de ${idioma}`, setFlag:'aprendioIdiomaEuropa'},
           {label:'Ir a las clases de compromiso, sin esforzarme', eff:{cabeza:-2}, log:`no le puso ganas al curso de ${idioma}`, setFlag:'noAprendioIdiomaEuropa'},
         ]}
     );
@@ -2018,7 +2116,7 @@ function eventsForEuropa(){
     { tag:'PELEA CALLEJERA EN EUROPA', danger:true, text:`Una salida nocturna termina en una pelea callejera con varios testigos filmando todo.`,
       choices:[
         {label:'Meterse de lleno en la pelea', eff:{}, log:'se metió en una pelea callejera en Europa', special:'peleaEuropa'},
-        {label:'Separar y sacar a los amigos de ahí', eff:{cabeza:4, junta:3}, log:'evitó una pelea callejera en Europa'},
+        {label:'Separar y sacar a los amigos de ahí', eff:{cabeza:4}, log:'evitó una pelea callejera en Europa'},
       ]},
     { tag:'DENUNCIA EN EUROPA', danger:true, clubReact:true, text:`Una situación de una noche de más termina en una denuncia formal en tu contra, con la prensa local siguiendo el caso de cerca.`,
       choices:[
@@ -2039,8 +2137,24 @@ function eventsForEuropa(){
   return eventos;
 }
 
+function represaliaCartelEvent(){
+  return { tag:'REPRESALIA DEL CARTEL', danger:true, clubReact:true,
+    text:`El cartel toma represalias por tu denuncia pública: en un confuso episodio, al salir del entrenamiento te esperan entre tres y te dan una golpiza. Terminás hospitalizado y no podés jugar por tres meses.`,
+    choices:[
+      {label:'Recuperarte y continuar en el club', eff:{}, log:'se recuperó de la golpiza del cartel y siguió en el mismo club', special:'represaliaQuedarse'},
+      {label:'Pedir la rescisión del contrato y el pase a un club argentino', eff:{}, log:'pidió la rescisión tras la golpiza del cartel y volvió a jugar a Argentina', special:'represaliaVolverArgentina'},
+    ]};
+}
+
 function eventsForMexico(){
   return [
+    { tag:'ATAQUE A LA FAMILIA', danger:true, clubReact:true,
+      text:`Un cartel de la ciudad, luego de reiteradas amenazas a tu familia, entró a tu casa, robó tus pertenencias y decapitó a tu mascota.`,
+      choices:[
+        {label:'Ir a fondo: hacer la denuncia y bancarse las consecuencias', eff:{}, log:'denunció públicamente al cartel que atacó su casa y a su familia', special:'denunciaCartelAFondo'},
+        {label:'Informar al club y pedir la rescisión de común acuerdo para volver a Argentina', eff:{}, log:'pidió la rescisión de común acuerdo con el club para volver a jugar a Argentina', special:'rescisionComunAcuerdoCartel'},
+        {label:'Dejar que pase el mal trago y que se encargue tu abogado', eff:{}, log:'dejó que su abogado se encargara de todo tras el ataque del cartel', special:'abogadoCartelSeEncarga'},
+      ]},
     { tag:'ADVERTENCIA', danger:true, text:`Un hombre que no conocés se te acerca en el estacionamiento del predio y te "recomienda" que definas mejor los penales a favor de ciertos resultados.`,
       choices:[
         {label:'Denunciarlo ante la directiva del club', eff:{opinion:6, cabeza:-4}, log:'denunció una advertencia extraña ante la directiva del club en México'},
@@ -2109,7 +2223,7 @@ function debutComoDTEvent(){
   return { tag:'DEBUT COMO DT', text:`Tu primer partido al mando del equipo, con la presión de saber que ya no depende de tus piernas.`,
     choices:[
       {label:'Salir con una formación arriesgada', eff:{fama:5, cabeza:-3}, log:'debutó como DT con una formación arriesgada'},
-      {label:'Ser conservador para arrancar bien', eff:{cabeza:4, junta:3}, log:'debutó como DT con un planteo conservador'},
+      {label:'Ser conservador para arrancar bien', eff:{cabeza:4}, log:'debutó como DT con un planteo conservador'},
     ]};
 }
 
@@ -2124,19 +2238,28 @@ function simularTemporadaDT(){
   state.dtTemporada = {pj, ganados, empatados, perdidos};
   state.dtPJ += pj; state.dtGanados += ganados; state.dtEmpatados += empatados; state.dtPerdidos += perdidos;
   if(state.dtContract){ state.carreraGanancias += state.dtContract.salaryPerYear; state.dtContract.yearsLeft -= 1; }
+
+  let probTituloDT = 0.02;
+  if(CLUBES_ELITE_ARG.includes(state.club.n)) probTituloDT = 0.12;
+  else if(CLUBES_GRANDES_ARG.includes(state.club.n)) probTituloDT = 0.06;
+  probTituloDT *= (0.5 + nivel/100);
+  if(Math.random() < probTituloDT){
+    state.dtTitulos += 1;
+    addLog(`salió campeón como DT de ${state.club.n}`);
+  }
 }
 
 function eventsForDT(){
   return [
     { tag:'REFUERZO CARO', text:`Pedís un refuerzo carísimo para el equipo y la dirigencia duda si hacer el esfuerzo económico.`,
       choices:[
-        {label:'Insistir hasta que lo compren', eff:{guita:-6, fama:4, junta:-3}, log:'insistió hasta lograr el fichaje de un refuerzo caro'},
+        {label:'Insistir hasta que lo compren', eff:{guita:-6, fama:4}, log:'insistió hasta lograr el fichaje de un refuerzo caro'},
         {label:'Resignarse y armar el equipo con lo que hay', eff:{cabeza:4}, log:'armó el equipo sin el refuerzo caro que pedía'},
       ]},
     { tag:'CONFLICTO CON REFERENTE', text:`Un jugador histórico del plantel no acepta quedar afuera del equipo titular y te lo hace saber delante de todos.`,
       choices:[
-        {label:'Bancar la decisión igual, sin importar quién sea', eff:{cabeza:5, junta:-6}, log:'sostuvo una decisión técnica pese al conflicto con un referente'},
-        {label:'Darle un lugar para bajar la tensión', eff:{junta:5, cabeza:-2}, log:'cedió ante un referente para bajar la tensión interna'},
+        {label:'Bancar la decisión igual, sin importar quién sea', eff:{cabeza:5}, log:'sostuvo una decisión técnica pese al conflicto con un referente'},
+        {label:'Darle un lugar para bajar la tensión', eff:{cabeza:-2}, log:'cedió ante un referente para bajar la tensión interna'},
       ]},
     { tag:'OFERTA PARA ARREGLAR', text:`Un grupo se te acerca antes de un partido clave y te ofrece plata para "bajar un poco" el nivel de tu equipo.`,
       choices:[
@@ -2156,12 +2279,12 @@ function eventsForDT(){
     { tag:'ESCÁNDALO DE VESTUARIO', text:`Se filtra a la prensa una pelea interna fuerte entre dos referentes de tu plantel.`,
       choices:[
         {label:'Ventilarlo públicamente y poner los puntos', eff:{prensa:-4, opinion:-3}, log:'ventiló públicamente un escándalo de vestuario'},
-        {label:'Manejarlo puertas adentro', eff:{junta:5, prensa:3}, log:'manejó puertas adentro un escándalo de vestuario'},
+        {label:'Manejarlo puertas adentro', eff:{prensa:3}, log:'manejó puertas adentro un escándalo de vestuario'},
       ]},
     { tag:'DIRIGENCIA ENCIMA', text:`La dirigencia te exige resultados inmediatos o te avisa que tu continuidad está en duda.`,
       choices:[
-        {label:'Responder fuerte en conferencia de prensa', eff:{fama:4, junta:-5}, log:'respondió fuerte a la dirigencia en conferencia de prensa', special:'responderFuerteDirigencia'},
-        {label:'Bajar el tono y trabajar puertas adentro', eff:{cabeza:4, junta:3}, log:'bajó el tono ante la presión de la dirigencia'},
+        {label:'Responder fuerte en conferencia de prensa', eff:{fama:4}, log:'respondió fuerte a la dirigencia en conferencia de prensa', special:'responderFuerteDirigencia'},
+        {label:'Bajar el tono y trabajar puertas adentro', eff:{cabeza:4}, log:'bajó el tono ante la presión de la dirigencia'},
       ]},
     { tag:'APOSTAR POR LOS PIBES', text:`Tenés que decidir si le das lugar a los juveniles del club en vez de gastar en refuerzos caros.`,
       choices:[
@@ -2175,8 +2298,8 @@ function eventsForDT(){
       ]},
     { tag:'ARQUERO SUPLENTE INCÓMODO', text:`El arquero suplente se queja públicamente de no tener minutos pese a entrenar mejor que el titular, según él.`,
       choices:[
-        {label:'Darle explicaciones públicas', eff:{prensa:3, junta:-2}, log:'dio explicaciones públicas a un arquero suplente incómodo'},
-        {label:'No responderle a través de los medios', eff:{junta:-4}, log:'no respondió públicamente a un arquero suplente incómodo'},
+        {label:'Darle explicaciones públicas', eff:{prensa:3}, log:'dio explicaciones públicas a un arquero suplente incómodo'},
+        {label:'No responderle a través de los medios', eff:{}, log:'no respondió públicamente a un arquero suplente incómodo'},
       ]},
     { tag:'OFERTA DE UN CANAL', text:`Un canal te ofrece transmitir en exclusiva tus prácticas para armar contenido detrás de escena.`,
       choices:[
@@ -2185,7 +2308,7 @@ function eventsForDT(){
       ]},
     { tag:'PADRE DE UN JUVENIL', text:`El padre de un juvenil promesa se acerca reiteradamente a pedirte minutos para su hijo, cada vez con menos códigos.`,
       choices:[
-        {label:'Ponerle un límite claro', eff:{cabeza:4, junta:2}, log:'le puso un límite claro al padre de un juvenil promesa'},
+        {label:'Ponerle un límite claro', eff:{cabeza:4}, log:'le puso un límite claro al padre de un juvenil promesa'},
         {label:'Evitar el conflicto y no confrontarlo', eff:{cabeza:-3}, log:'evitó confrontar al padre insistente de un juvenil promesa'},
       ]},
     { tag:'CAMBIO TÁCTICO ARRIESGADO', text:`Antes de un partido clave, dudás entre un esquema táctico nunca probado o la fórmula segura de siempre.`,
@@ -2195,8 +2318,8 @@ function eventsForDT(){
       ]},
     { tag:'PASE POLÉMICO DE SALIDA', text:`La dirigencia quiere vender a tu mejor jugador en pleno campeonato y te pide que lo convenzas vos.`,
       choices:[
-        {label:'Convencerlo de que se vaya', eff:{guita:6, junta:-4}, log:'convenció a su mejor jugador de irse en pleno campeonato'},
-        {label:'Pelear para que se quede', eff:{junta:5, fama:-2}, log:'peleó para retener a su mejor jugador en pleno campeonato'},
+        {label:'Convencerlo de que se vaya', eff:{guita:6}, log:'convenció a su mejor jugador de irse en pleno campeonato'},
+        {label:'Pelear para que se quede', eff:{fama:-2}, log:'peleó para retener a su mejor jugador en pleno campeonato'},
       ]},
   ];
 }
@@ -2210,7 +2333,7 @@ function eventsForPolitico(){
       ]},
     { tag:'FINANCIAMIENTO', text:`Un empresario se ofrece a poner plata fuerte para tu campaña, sin aclarar bien qué espera a cambio.`,
       choices:[
-        {label:'Aceptar el financiamiento', eff:{guita:12, junta:-8, opinion:-3}, log:'aceptó financiamiento de campaña de un empresario'},
+        {label:'Aceptar el financiamiento', eff:{guita:12, opinion:-3}, log:'aceptó financiamiento de campaña de un empresario'},
         {label:'Rechazarlo y financiarse por afuera', eff:{guita:-6, opinion:4}, log:'rechazó financiamiento dudoso para su campaña'},
       ]},
     { tag:'DEBATE PÚBLICO', text:`Te toca debatir en vivo contra un rival político con mucha más experiencia en la rosca.`,
@@ -2225,8 +2348,8 @@ function eventsForPolitico(){
       ]},
     { tag:'PRESIÓN GREMIAL', text:`Un gremialista te pide que respaldes un paro a cambio de sostenerte políticamente de acá en adelante.`,
       choices:[
-        {label:'Respaldar el paro', eff:{junta:6, opinion:-4}, log:'respaldó un paro a pedido de un gremialista aliado'},
-        {label:'No meterse en el conflicto gremial', eff:{junta:-5, opinion:2}, log:'evitó meterse en un conflicto gremial'},
+        {label:'Respaldar el paro', eff:{opinion:-4}, log:'respaldó un paro a pedido de un gremialista aliado'},
+        {label:'No meterse en el conflicto gremial', eff:{opinion:2}, log:'evitó meterse en un conflicto gremial'},
       ]},
     { tag:'SOSPECHA DE SOBREPRECIO', text:`Se filtra a la prensa una sospecha de sobreprecio en una obra pública vinculada a tu gestión.`,
       choices:[
@@ -2235,7 +2358,7 @@ function eventsForPolitico(){
       ]},
     { tag:'ALIANZA INCÓMODA', text:`Te ofrecen una alianza política conveniente con un sector que tiene bastante mala imagen pública.`,
       choices:[
-        {label:'Aceptar la alianza por conveniencia', eff:{candidateable:10, opinion:-6, junta:-3}, log:'aceptó una alianza política incómoda por conveniencia'},
+        {label:'Aceptar la alianza por conveniencia', eff:{candidateable:10, opinion:-6}, log:'aceptó una alianza política incómoda por conveniencia'},
         {label:'Rechazarla pese al costo político', eff:{opinion:5, candidateable:-4}, log:'rechazó una alianza política incómoda'},
       ]},
     { tag:'VIAJE OFICIAL', text:`Un viaje oficial pago con fondos públicos genera críticas fuertes en los medios.`,
@@ -2260,12 +2383,12 @@ function eventsForPolitico(){
       ]},
     { tag:'ARREGLO ELECTORAL', danger:true, text:`Te ofrecen "asegurar" el resultado de la elección manipulando el conteo en un par de mesas clave.`,
       choices:[
-        {label:'Aceptar el arreglo', eff:{candidateable:12, junta:-12, opinion:-8}, log:'aceptó un arreglo electoral para asegurar el resultado'},
+        {label:'Aceptar el arreglo', eff:{candidateable:12, opinion:-8}, log:'aceptó un arreglo electoral para asegurar el resultado'},
         {label:'Rechazarlo y jugarse el resultado limpio', eff:{opinion:8}, log:'rechazó un arreglo electoral y se jugó el resultado limpio'},
       ]},
     { tag:'ROSCA CON LA POLICÍA', text:`El jefe de la policía de la ciudad te ofrece un trato: protección y favores a cambio de mirar para otro lado en algunos operativos.`,
       choices:[
-        {label:'Cerrar el trato con la policía', eff:{candidateable:6, junta:-6, barrio:-3}, log:'cerró un trato con el jefe de la policía de la ciudad'},
+        {label:'Cerrar el trato con la policía', eff:{candidateable:6, barrio:-3}, log:'cerró un trato con el jefe de la policía de la ciudad'},
         {label:'Mantener distancia', eff:{opinion:3}, log:'mantuvo distancia de un trato con la policía de la ciudad'},
       ]},
     { tag:'PAUTA OFICIAL', text:`Te ofrecen repartir pauta oficial entre los medios locales a cambio de una cobertura mucho más amable con tu gestión.`,
@@ -2310,8 +2433,8 @@ function fundacionSeguimientoEvent(){
 function empresarioFavorEvent(){
   return { tag:'EL FAVOR DEL EMPRESARIO', text:`Aquel dueño de un medio importante te llama para "devolverle la gentileza": te pide que publiques un apoyo a un candidato el día antes de una elección.`,
     choices:[
-      {label:'Publicarlo, después de todo le debo el favor', eff:{candidateable:12, opinion:-6, junta:-4}, log:'publicó un apoyo político a pedido de un empresario mediático'},
-      {label:'Decirle que eso ya es pedirte demasiado', eff:{junta:5, candidateable:-4}, log:'rechazó un pedido político de un empresario mediático'},
+      {label:'Publicarlo, después de todo le debo el favor', eff:{candidateable:12, opinion:-6}, log:'publicó un apoyo político a pedido de un empresario mediático'},
+      {label:'Decirle que eso ya es pedirte demasiado', eff:{candidateable:-4}, log:'rechazó un pedido político de un empresario mediático'},
     ]};
 }
 function hijoCreceEvent(){
@@ -2327,15 +2450,32 @@ function hijoCreceEvent(){
 function representanteQuiereMasEvent(){
   return { tag:'EL REPRESENTANTE QUIERE MÁS', text:`Aquel representante turbio te llama de nuevo: ahora te pide que convenzas a un compañero para que también firme con él, a cambio de una comisión.`,
     choices:[
-      {label:'Convencer a mi compañero', eff:{guita:6, junta:-8}, log:'convenció a un compañero para que firmara con el representante turbio'},
-      {label:'Cortar la relación con el representante', eff:{junta:6, guita:-2}, log:'cortó la relación con el representante turbio'},
+      {label:'Convencer a mi compañero', eff:{guita:6}, log:'convenció a un compañero para que firmara con el representante turbio'},
+      {label:'Cortar la relación con el representante', eff:{guita:-2}, log:'cortó la relación con el representante turbio'},
     ]};
 }
 function investiganCoimaDTEvent(){
   return { tag:'SE INVESTIGA LA COIMA AL DT', danger:true, clubReact:true, text:`Un periodista de investigación encuentra rastros de la plata que le diste al DT para ser titular y empieza a hacer preguntas incómodas.`,
     choices:[
       {label:'Negar todo públicamente', eff:{opinion:-4, prensa:-4}, log:'negó públicamente haberle pagado al DT'},
-      {label:'Reconocerlo puertas adentro con el club', eff:{junta:4, opinion:-2}, log:'reconoció puertas adentro haberle pagado al DT'},
+      {label:'Reconocerlo puertas adentro con el club', eff:{opinion:-2}, log:'reconoció puertas adentro haberle pagado al DT'},
+    ]};
+}
+
+function estafaJudicialEvent(){
+  return { tag:'CAE LA ESTAFA', danger:true, text:`El curso de coaching y liderazgo era una estafa piramidal. El tipo de buen corazón terminó preso y vos estás siendo investigado por la Justicia.`,
+    choices:[
+      {label:'Declarar ante la prensa que no sabías nada y que fue idea de tu representante', eff:{}, log:'declaró ante la prensa que no sabía nada de la estafa y culpó a su representante', special:'estafaCulparRepresentante'},
+      {label:'Que hablen tu abogado y tu representante por vos', eff:{}, log:'dejó que su abogado y su representante hablaran por él ante la estafa', special:'estafaAbogadoHabla'},
+      {label:'No decir nada y esperar que la Justicia haga su trabajo', eff:{}, log:'no dijo nada y esperó que la Justicia resolviera el caso de la estafa', special:'estafaSilencio'},
+    ]};
+}
+
+function socioBuenachonEvent(){
+  return { tag:'SOCIO DIRECTO', text:`El tipo buenachón que te ofreció ser parte del curso de liderazgo y coaching vuelve con la propuesta, pero ahora para que seas socio directo de la organización y obtener hasta un 30% de ganancias mensuales.`,
+    choices:[
+      {label:'Aceptar la propuesta', eff:{}, log:'aceptó ser socio directo de la organización del buenachón', special:'socioBuenachonAceptar'},
+      {label:'No aceptar y cortar relación definitivamente con el empresario', eff:{}, log:'cortó relación definitivamente con el empresario buenachón'},
     ]};
 }
 
@@ -2344,7 +2484,7 @@ function multaIdiomaEvent(){
   return { tag:'MULTA POR EL IDIOMA', text:`El club te aplica una multa reglamentaria por no haber aprobado el nivel mínimo de ${idioma} exigido a los extranjeros.`,
     choices:[
       {label:'Pagar la multa sin quejarte', eff:{guita:-6}, log:`pagó una multa del club por no aprender ${idioma}`},
-      {label:'Reclamar ante la dirigencia', eff:{junta:-4, opinion:-2}, log:`reclamó una multa del club por no aprender ${idioma}`},
+      {label:'Reclamar ante la dirigencia', eff:{opinion:-2}, log:`reclamó una multa del club por no aprender ${idioma}`},
     ]};
 }
 function dtSacaMinutosIdiomaEvent(){
@@ -2364,6 +2504,7 @@ function checkFlagFollowups(){
     {flag:'reconocioHijo', done:'seguidoHijo', chance:0.22, build: hijoCreceEvent},
     {flag:'representanteTurbioActivo', done:'seguidoRepresentanteTurbio', chance:0.28, build: representanteQuiereMasEvent},
     {flag:'coimeoAlDT', done:'seguidoCoimaDT', chance:0.30, build: investiganCoimaDTEvent},
+    {flag:'ofertaCriptoRecibida', done:'seguidoSocioBuenachon', chance:0.30, build: socioBuenachonEvent},
     {flag:'noAprendioIdiomaEuropa', done:'seguidoMultaIdioma', chance:0.35, build: multaIdiomaEvent},
     {flag:'noAprendioIdiomaEuropa', done:'seguidoDTIdioma', chance:0.30, build: dtSacaMinutosIdiomaEvent},
   ];
@@ -2457,8 +2598,8 @@ function infidelidadDescubiertaEvent(){
   return { tag:'SE SUPO', danger:true,
     text:`Tu compañero se enteró de la salida con su mujer. El vestuario entero lo sabe en menos de una semana.`,
     choices:[
-      {label:'Dar la cara con el plantel', eff:{futbol:-8, junta:-10}, log:'dio la cara ante el plantel tras el escándalo con la mujer de su compañero'},
-      {label:'Pedir que te transfieran de club', eff:{futbol:-6, barrio:-8, junta:-4}, log:'pidió salir del club tras el escándalo con la mujer de su compañero'},
+      {label:'Dar la cara con el plantel', eff:{futbol:-8}, log:'dio la cara ante el plantel tras el escándalo con la mujer de su compañero'},
+      {label:'Pedir que te transfieran de club', eff:{futbol:-6, barrio:-8}, log:'pidió salir del club tras el escándalo con la mujer de su compañero'},
     ]};
 }
 
@@ -2519,14 +2660,30 @@ function darkRiskCheck(){
 function buildSeasonQueue(){
   decaerCooldowns();
   const q = [];
+  if(state.phase==='jugador' && state.flags.fichajeIrregular){
+    state.flags.fichajeIrregular = false;
+    if(Math.random() < 0.30){
+      const rangoArg = tierParaNivel(state.stats.futbol);
+      const clubVuelta = randomClub(rangoArg.min, rangoArg.max, ['PD','PN']);
+      cambiarClub(clubVuelta);
+      state.contract = { yearsLeft: Math.round(rand(1,2)), salaryPerYear: computeSalary(clubVuelta, state.stats.futbol, state.age) };
+      state.prestamo = null;
+      addLog('en Europa se enteraron de la irregularidad de aquel pase y tuvo que rescindir, volviendo al fútbol argentino');
+    }
+  }
   if(state.flags.pendingDoping){ state.flags.pendingDoping=false; q.push(dopingSuspensionEvent()); }
   if(state.flags.pendingOfertaFuerte){ state.flags.pendingOfertaFuerte=false; q.push(ofertaPoliticaFuerte()); }
   if(state.flags.pendingFiltracionBarra){ state.flags.pendingFiltracionBarra=false; q.push(filtracionBarraEvent()); }
   if(state.flags.pendingAmenazaBarra){ state.flags.pendingAmenazaBarra=false; q.push(amenazaBarraEvent()); }
   if(state.flags.pendingInfidelidadDescubierta){ state.flags.pendingInfidelidadDescubierta=false; q.push(infidelidadDescubiertaEvent()); }
   if(state.flags.pendingCoimaDescubierta){ state.flags.pendingCoimaDescubierta=false; q.push(coimaDescubiertaEvent()); }
+  if(state.flags.pendingEstafaJudicial){ state.flags.pendingEstafaJudicial=false; q.push(estafaJudicialEvent()); }
+  if(state.flags.pendingRepresaliaCartel){ state.flags.pendingRepresaliaCartel=false; q.push(represaliaCartelEvent()); }
   if(state.flags.pendingResultadoJusticia){ state.flags.pendingResultadoJusticia=false; q.push(resultadoJusticiaEvent()); }
   if(state.phase==='jugador' && (!state.contract || state.contract.yearsLeft <= 0)){ q.push(contractOfferEvent()); }
+  else if(state.phase==='jugador' && state.club.d!=='LIBRE' && state.contract && state.contract.yearsLeft > 0 && Math.random() < 0.035){
+    q.push(finDeCicloEvent());
+  }
   if(state.phase==='jugador' && state.club.d!=='LIBRE' && !state.prestamo && state.temporadaStats && state.temporadaStats.partidos < 10 && state.age <= 24 && !state.flags.prestamoOfrecido && Math.random() < 0.6){
     state.flags.prestamoOfrecido = true;
     q.push(prestamoEvent());
@@ -2742,15 +2899,16 @@ function resolveChoice(c){
   if(c.special==='entraPolitica'){
     state.phase='politico';
     const partido = PARTIDOS_POLITICOS[Math.floor(Math.random()*PARTIDOS_POLITICOS.length)];
-    state.club = {n: partido, d:'POL', t:0};
+    cambiarClub({n: partido, d:'POL', t:0});
     state.contract = null;
   }
   if(c.special==='firmarContrato'){
-    state.club = c.offerData.club;
+    cambiarClub(c.offerData.club);
     state.contract = {yearsLeft: c.offerData.years, salaryPerYear: c.offerData.salary};
     state.prestamo = null;
     state.flags.prestamoOfrecido = false;
     state.flags.recienRescindido = false;
+    if(c.offerData.irregular){ state.flags.fichajeIrregular = true; }
   }
   if(c.special==='aceptaPrestamo'){
     state.prestamo = {club: c.clubDestino, yearsLeft: 1};
@@ -2764,13 +2922,183 @@ function resolveChoice(c){
       addLog('la noche con la modelo le salió carísima: terminó con un problema de salud complicado');
     }
   }
-  if(c.special==='periodistaAceptar'){
-    if(Math.random() < 0.6){
-      applyEffects({futbol:2, fama:4});
-      addLog('ganó terreno en el equipo tras la nota con la periodista');
+  if(c.special==='heladeraPerfumes'){
+    if(Math.random() < 0.5){
+      applyEffects({opinion:5});
+      addLog('el negocio de los perfumes le levantó la imagen en el barrio');
     } else {
-      applyEffects({futbol:-3, junta:-8, opinion:-4});
-      addLog('se filtró todo y el vestuario lo dejó de lado tras la nota con la periodista');
+      applyEffects({opinion:-5});
+      addLog('el negocio de los perfumes no cayó nada bien');
+    }
+  }
+  if(c.special==='festejarImitacion'){
+    if(Math.random() < 0.5){
+      applyEffects({opinion:4});
+      addLog('la gente vio con buenos ojos que lo bancara');
+    } else {
+      applyEffects({opinion:-4});
+      addLog('a varios no les cayó bien que alentara a que lo imiten');
+    }
+  }
+  if(c.special==='casamientoAceptar'){
+    applyEffects({opinion:6, prensa:5, barrio:4, guita:-6});
+  }
+  if(c.special==='casamientoRechazar'){
+    if(Math.random() < 0.5){
+      applyEffects({futbol: -Math.round(rand(1,2)), opinion:4, prensa:3, cabeza:-4});
+      addLog('rechazar el casamiento le pasó factura en la cabeza y se notó en el nivel');
+    } else {
+      addLog('rechazó el casamiento y no pasó mayor cosa');
+    }
+  }
+  if(c.special==='arreglarPartido' || c.special==='arreglarPartidoGrande'){
+    applyEffects({guita: c.special==='arreglarPartidoGrande' ? 18 : 10});
+    state.flags.arregloPartidoHecho = true;
+    if(Math.random() < 0.5){
+      cambiarClub({ n:'Sin club', d:'LIBRE', t:5 });
+      state.contract = null;
+      state.prestamo = null;
+      addLog('se descubrió que arregló el resultado a cambio de plata: el club rescindió el contrato con efecto inmediato');
+    } else {
+      addLog('nadie se enteró del arreglo, por ahora');
+    }
+  }
+  if(c.special==='contenidoPicanteAceptar'){
+    applyEffects({opinion:5, prensa:5, futbol:-1, fama:6});
+    if(Math.random() < 0.5){
+      if(Math.random() < 0.5){
+        cambiarClub({ n:'Sin club', d:'LIBRE', t:5 });
+        state.contract = null;
+        state.prestamo = null;
+        addLog('el club se tomó a mal el contenido picante y le rescindió el contrato; van a llegar nuevas propuestas');
+      } else {
+        state.phase = 'suspendido';
+        state.suspensionYearsLeft = 1;
+        state.flags.dtInterino = false;
+        addLog('el club se tomó a mal el contenido picante y lo suspendió por una temporada');
+      }
+    }
+  }
+  if(c.special==='agenteFifaAceptar'){
+    state.flags.agenteFifaTurbio = true;
+  }
+  if(c.special==='finDeCicloCantilo'){
+    cambiarClub({ n:'Cantilo FC', d:'LIBRE', t:5 });
+    state.contract = null;
+    state.prestamo = null;
+    state.flags.recienRescindido = true;
+  }
+  if(c.special==='inversionCriptoAceptar'){
+    const monto = pagarPorcentajeGanancias(0.5);
+    addLog(`invirtió ${fmtUSD(monto)} en el curso de coaching y liderazgo (50% de sus ganancias)`);
+    if(Math.random() < 0.4){
+      state.flags.pendingEstafaJudicial = true;
+    }
+  }
+  if(c.special==='estafaCulparRepresentante'){
+    addLog('rompió relación con su representante tras culparlo públicamente por la estafa');
+    if(Math.random() < 0.3){
+      const monto = pagarPorcentajeGanancias(0.5);
+      state.phase = 'suspendido';
+      state.suspensionYearsLeft = 1;
+      state.flags.dtInterino = false;
+      addLog(`la Justicia lo multó con ${fmtUSD(monto)} (50% de sus ganancias) y el club lo suspendió por una temporada`);
+    } else {
+      addLog('la Justicia no encontró motivos para sancionarlo por la estafa');
+    }
+  }
+  if(c.special==='estafaAbogadoHabla'){
+    if(Math.random() < 0.2){
+      const monto = pagarPorcentajeGanancias(0.5);
+      state.phase = 'suspendido';
+      state.suspensionYearsLeft = 1;
+      state.flags.dtInterino = false;
+      addLog(`la Justicia lo multó con ${fmtUSD(monto)} (50% de sus ganancias) y el club lo suspendió por un año`);
+    } else {
+      addLog('el abogado y el representante lograron despejar las dudas de la Justicia');
+    }
+  }
+  if(c.special==='estafaSilencio'){
+    if(Math.random() < 0.05){
+      addLog('la Justicia determinó que participó de la estafa a sabiendas y terminó preso; ahí se cerró la carrera');
+      finishGame('quemado');
+      return;
+    } else {
+      addLog('la Justicia determinó que también fue estafado y quedó libre de toda culpa');
+    }
+  }
+  if(c.special==='socioBuenachonAceptar'){
+    if(Math.random() < 0.6){
+      state.flags.pendingEstafaJudicial = true;
+    } else {
+      addLog('esta vez la sociedad con el buenachón no trajo problemas... por ahora');
+    }
+  }
+  if(c.special==='denunciaCartelAFondo'){
+    const monto = pagarPorcentajeGanancias(0.10);
+    applyEffects({futbol:-1, fama:18});
+    addLog(`gastó ${fmtUSD(monto)} en la causa contra el cartel (10% de sus ganancias)`);
+    if(Math.random() < 0.6){
+      state.flags.pendingRepresaliaCartel = true;
+    }
+  }
+  if(c.special==='rescisionComunAcuerdoCartel'){
+    applyEffects({futbol:-1, opinion:-4, fama:-4});
+    const rango = tierParaNivel(state.stats.futbol);
+    const tierMinimo = Math.min(rango.min, state.clubInicial.t);
+    const clubVuelta = randomClub(tierMinimo, rango.max, ['PD','PN']);
+    cambiarClub(clubVuelta);
+    state.contract = { yearsLeft: Math.round(rand(1,3)), salaryPerYear: computeSalary(clubVuelta, state.stats.futbol, state.age) };
+    state.prestamo = null;
+    addLog(`rescindió de común acuerdo con el club y volvió a jugar a ${clubVuelta.n} en Argentina`);
+  }
+  if(c.special==='abogadoCartelSeEncarga'){
+    const monto = pagarPorcentajeGanancias(0.10);
+    applyEffects({futbol:-1, opinion:6, fama:6});
+    addLog(`pagó ${fmtUSD(monto)} en gastos judiciales (10% de sus ganancias)`);
+  }
+  if(c.special==='represaliaQuedarse'){
+    state.modFutbolTemporal -= 8;
+    state.modPartidosTemporal -= 14;
+  }
+  if(c.special==='represaliaVolverArgentina'){
+    state.modFutbolTemporal -= 8;
+    state.modPartidosTemporal -= 14;
+    const rango = tierParaNivel(state.stats.futbol);
+    const tierMinimo = Math.min(rango.min, state.clubInicial.t);
+    let clubVuelta;
+    if(Math.random() < 0.4){
+      clubVuelta = state.clubInicial;
+    } else {
+      clubVuelta = randomClub(tierMinimo, rango.max, ['PD','PN']);
+    }
+    cambiarClub(clubVuelta);
+    state.contract = { yearsLeft: Math.round(rand(1,3)), salaryPerYear: computeSalary(clubVuelta, state.stats.futbol, state.age) };
+    state.prestamo = null;
+    addLog(`rescindió tras la golpiza del cartel y volvió a jugar a ${clubVuelta.n} en Argentina`);
+  }
+  if(c.special==='periodistaAceptar'){
+    if(Math.random() < 0.4){
+      applyEffects({prensa:6, opinion:5, fama:6});
+      if(Math.random() < 0.5){
+        cambiarClub({ n:'Sin club', d:'LIBRE', t:5 });
+        state.contract = null;
+        state.prestamo = null;
+        addLog('se supo todo: el club prescindió de él y va a tener que esperar nuevas ofertas');
+      } else {
+        state.phase = 'suspendido';
+        state.suspensionYearsLeft = 1;
+        state.flags.dtInterino = false;
+        addLog('se supo todo en el vestuario y el club lo suspendió por una temporada');
+      }
+    } else {
+      addLog('la nota con la periodista quedó en total reserva');
+    }
+  }
+  if(c.special==='periodistaRechazar'){
+    if(Math.random() < 0.5){
+      applyEffects({futbol:1});
+      addLog('rechazar la propuesta le hizo bien a la cabeza y se notó en el nivel');
     }
   }
   if(c.special==='manejarBorracho'){
@@ -2784,12 +3112,11 @@ function resolveChoice(c){
   }
   if(c.special==='peleaCano'){
     if(Math.random() < 0.5){
-      applyEffects({junta:-10, opinion:-4, cabeza:-4});
-      addLog('la pelea se le fue de las manos y terminó lesionando gravemente a un compañero, arruinándole la carrera');
-      reaccionDelClub(0.35);
+      applyEffects({plantel:14, opinion:-3});
+      addLog('se hizo respetar a las piñas y ganó peso dentro del plantel');
     } else {
-      applyEffects({futbol:-5, cabeza:-8, opinion:-3});
-      addLog('la pelea se le fue en contra: terminó cagado a bifes por el propio compañero');
+      applyEffects({plantel:-18, cabeza:-5, opinion:-3});
+      addLog('la pelea le jugó en contra: perdió peso dentro del plantel');
     }
   }
   if(c.special==='copaPotreroExCrack'){
@@ -2821,7 +3148,7 @@ function resolveChoice(c){
       applyEffects({futbol:6, fama:4});
       addLog('el arreglo con el ojeador le salió bien y subió de categoría rápido');
     } else {
-      applyEffects({futbol:-4, opinion:-6, junta:-6});
+      applyEffects({futbol:-4, opinion:-6});
       addLog('lo descubrieron con la partida de nacimiento arreglada y quedó suspendido un torneo entero');
     }
   }
@@ -2836,10 +3163,9 @@ function resolveChoice(c){
   }
   if(c.special==='examenAjeno'){
     if(Math.random() < 0.4){
-      applyEffects({junta:6});
       addLog('dio el control antidoping por su compañero y nadie se enteró');
     } else {
-      applyEffects({futbol:-6, opinion:-8, junta:-4});
+      applyEffects({futbol:-6, opinion:-8});
       addLog('lo descubrieron dando un control antidoping por otro y quedó suspendido');
       reaccionDelClub(0.4);
     }
@@ -2860,7 +3186,7 @@ function resolveChoice(c){
       applyEffects({guita:14});
       addLog('el empresario amigo terminó pagando todo con intereses');
     } else {
-      applyEffects({guita:-10, junta:-4});
+      applyEffects({guita:-10});
       addLog('el reclamo por el cheque sin fondos terminó saliendo peor de lo esperado');
     }
   }
@@ -2871,7 +3197,7 @@ function resolveChoice(c){
     } else {
       applyEffects({futbol:-14, opinion:-14, junta:-16, barrio:-10});
       const clubDestino = randomClub(4, 5, ['PD','PN']);
-      state.club = clubDestino;
+      cambiarClub(clubDestino);
       state.contract = {yearsLeft: Math.round(rand(1,2)), salaryPerYear: computeSalary(clubDestino, state.stats.futbol, state.age)};
       state.prestamo = null;
       addLog('quedó vinculado en una causa judicial en México y tuvo que volver de urgencia a jugar a Argentina');
@@ -2895,7 +3221,7 @@ function resolveChoice(c){
     registrarIncidenteEuropa(0.20);
   }
   if(c.special==='cafeEmpresarioMediatico'){
-    applyEffects({candidateable:14, prensa:6, junta:-5});
+    applyEffects({candidateable:14, prensa:6});
   }
   if(c.special==='posturaPoliticaClara'){
     applyEffects({candidateable:6, opinion:-4, fama:3});
@@ -2906,13 +3232,13 @@ function resolveChoice(c){
     const salarioNormal = computeSalary(nuevoClub, state.stats.futbol, state.age);
     const distorsion = Math.random() < 0.5 ? rand(0.2,0.5) : rand(1.8,3);
     const salarioDudoso = Math.round(salarioNormal * distorsion / 500) * 500;
-    state.club = nuevoClub;
+    cambiarClub(nuevoClub);
     state.contract = {yearsLeft: duracionRara, salaryPerYear: salarioDudoso};
     state.prestamo = null;
     addLog(`la cláusula rarísima lo transfirió de urgencia a ${nuevoClub.n}, con un contrato de ${duracionRara} año${duracionRara===1?'':'s'} y un sueldo bastante dudoso`);
   }
   if(c.special==='pedirVueltaArgentina'){
-    state.club = { n:'Sin club', d:'LIBRE', t:5 };
+    cambiarClub({ n:'Sin club', d:'LIBRE', t:5 });
     state.contract = null;
     state.prestamo = null;
     addLog('rescindió su contrato en México y quedó a la espera de ofertas de Argentina');
@@ -2929,12 +3255,12 @@ function resolveChoice(c){
     state.modPartidosTemporal -= 27;
   }
   if(c.special==='firmarContratoDT'){
-    state.club = c.offerData.club;
+    cambiarClub(c.offerData.club);
     state.dtContract = {yearsLeft: c.offerData.years, salaryPerYear: c.offerData.salary};
   }
   if(c.special==='responderFuerteDirigencia'){
     if(Math.random() < 0.5){
-      state.club = { n:'Sin club', d:'LIBRE', t:5 };
+      cambiarClub({ n:'Sin club', d:'LIBRE', t:5 });
       state.dtContract = null;
       addLog('la dirigencia lo echó de inmediato tras la conferencia de prensa');
     }
@@ -2951,7 +3277,7 @@ function resolveChoice(c){
   if(c.special==='transicionPolitica'){
     state.phase = 'politico';
     const partido = PARTIDOS_POLITICOS[Math.floor(Math.random()*PARTIDOS_POLITICOS.length)];
-    state.club = {n: partido, d:'POL', t:0};
+    cambiarClub({n: partido, d:'POL', t:0});
     state.contract = null;
     state.flags.definioFuturo = true;
     addLog(`dejó el fútbol para meterse de lleno en política con ${partido}`);
@@ -2997,18 +3323,20 @@ function finishGame(reason){
   $('stamp').className = 'stamp' + (danger ? ' danger' : '') + (title==='LEYENDA' ? ' leyenda' : '');
   $('endFlavor').textContent = flavor;
   $('finalStats').innerHTML = [
-    ['FÚTBOL', s.futbol], ['FAMA', s.fama], ['GUITA', s.guita],
+    ['FÚTBOL', state.futbolMaximo], ['FAMA', s.fama], ['PLANTEL', s.plantel],
     ['CABEZA', s.cabeza], ['BARRIO', s.barrio], ['JUNTA', s.junta>=50?'BUENA':'MALA'], ['OPINIÓN', s.opinion], ['PRENSA', s.prensa], ['ROSCA', s.candidateable],
   ].map(([l,n])=>`<div class="fstat"><div class="n">${n}</div><div class="l">${l}</div></div>`).join('');
 
   const mediaJugador = Math.round(
-    (s.futbol + s.fama + s.cabeza + s.barrio + s.junta + s.opinion + s.prensa + s.candidateable) / 8
+    (state.futbolMaximo + s.fama + s.cabeza + s.barrio + s.junta + s.opinion + s.prensa + s.candidateable) / 8
   );
+  const titulosTotales = state.carreraTitulos + state.dtTitulos;
   $('endCareerNums').innerHTML = [
     ['Media del jugador', `${mediaJugador}/100`],
     ['👟 Partidos jugados', state.carreraPJ],
     ['⚽ Goles', state.carreraGoles],
     ['🤝 Asistencias', state.carreraAsistencias],
+    ['🏅 Títulos ganados', titulosTotales],
     ['💰 Ganancias totales', fmtUSD(state.carreraGanancias)],
   ].map(([l,v])=>`<div class="row"><span>${l}</span><b>${v}</b></div>`).join('');
 
@@ -3036,4 +3364,3 @@ function finishGame(reason){
 </script>
 </body>
 </html>
-
