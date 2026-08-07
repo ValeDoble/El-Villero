@@ -542,6 +542,7 @@ button.primary:disabled{ opacity:.4; cursor:not-allowed; }
     <div class="social-row">
       <a class="social-link" href="https://www.instagram.com/valedoble90/" target="_blank" rel="noopener noreferrer">📷 Instagram</a>
       <a class="social-link" href="https://www.tiktok.com/@valedoble90" target="_blank" rel="noopener noreferrer">🎵 TikTok</a>
+      <a class="social-link" href="https://cafecito.app/valedoble" rel="noopener noreferrer" target="_blank">☕ Invitame un café</a>
     </div>
   </div>
 
@@ -591,6 +592,7 @@ button.primary:disabled{ opacity:.4; cursor:not-allowed; }
     <div class="social-row">
       <a class="social-link" href="https://www.instagram.com/valedoble90/" target="_blank" rel="noopener noreferrer">📷 Instagram</a>
       <a class="social-link" href="https://www.tiktok.com/@valedoble90" target="_blank" rel="noopener noreferrer">🎵 TikTok</a>
+      <a class="social-link" href="https://cafecito.app/valedoble" rel="noopener noreferrer" target="_blank">☕ Invitame un café</a>
     </div>
   </div>
 
@@ -620,6 +622,7 @@ button.primary:disabled{ opacity:.4; cursor:not-allowed; }
     <div class="social-row">
       <a class="social-link" href="https://www.instagram.com/valedoble90/" target="_blank" rel="noopener noreferrer">📷 Instagram</a>
       <a class="social-link" href="https://www.tiktok.com/@valedoble90" target="_blank" rel="noopener noreferrer">🎵 TikTok</a>
+      <a class="social-link" href="https://cafecito.app/valedoble" rel="noopener noreferrer" target="_blank">☕ Invitame un café</a>
     </div>
   </div>
 
@@ -1439,7 +1442,7 @@ function eventsFor20to25(){
       ]},
     { tag:'REPRESENTANTE TURBIO', text:`Salís de entrenar y un turbio representante te ofrece firmar con él a cambio de mucha plata y una noche con una modelo.`,
       choices:[
-        {label:'Firmar', eff:{}, log:'firmó con el representante turbio a cambio de plata y una noche con una modelo', special:'representanteTurbioFirmar', setFlag:'representanteTurbioActivo'},
+        {label:'Firmar', eff:{}, log:'firmó con el representante turbio a cambio de plata y una noche con una modelo', special:'representanteTurbioFirmar', setFlag:['representanteTurbioActivo','conocioModeloJoven']},
         {label:'Rechazar', eff:{}, log:'rechazó al representante turbio y siguió con el mismo representante'},
       ]},
     { tag:'PROPUESTA DE LA PERIODISTA', text:`Una periodista te ofrece una noche con ella si le contás los quilombos del vestuario que involucran al titular en tu posición.`,
@@ -1466,6 +1469,11 @@ function eventsFor20to25(){
       choices:[
         {label:'Aceptar', eff:{guita:16, opinion:-10}, log:'aceptó ser la cara de una casa de citas de lujo'},
         {label:'Rechazar', eff:{opinion:2}, log:'rechazó ser la cara de una casa de citas de lujo'},
+      ]},
+    { tag:'BANDA DE CUMBIA', text:`Una banda de cumbia del barrio te pide grabar un tema con tu nombre.`,
+      choices:[
+        {label:'Aceptar, aparecer en el video y cantar', eff:{fama:6, opinion:4, prensa:4, barrio:6, cabeza:-3}, log:'grabó un tema de cumbia con una banda del barrio', special:'cumbiaAceptar'},
+        {label:'Mantener perfil bajo, piensan que se me subió la fama', eff:{barrio:-5, cabeza:3, futbol:1}, log:'mantuvo perfil bajo y rechazó grabar un tema de cumbia'},
       ]},
   ];
 }
@@ -1667,6 +1675,17 @@ function eventsFor26to32(){
         {label:'Comprarla y refaccionarla', eff:{guita:-9, barrio:4}, log:'compró y refaccionó una propiedad en el barrio'},
         {label:'No meterse en ese negocio', eff:{guita:2}, log:'no invirtió en una propiedad del barrio'},
       ]},
+    { tag:'CAFÉ CON LA INFLUENCER', text:`La famosa influencer Tussi Acosta, que tiene novio, quiere juntarse a "tomar un café" con vos.`,
+      choices:[
+        {label:'Aceptar y juntarse', eff:{}, log:'aceptó juntarse a tomar un café con una influencer conocida', special:'cafeInfluencerAceptar'},
+        {label:'No ir y contárselo a tu novia', eff:{}, log:'no fue al café y se lo contó a su novia'},
+      ]},
+    { tag:'VIDEO FILTRADO', danger:true, text:`Se filtra un video íntimo tuyo con una modelo, y las medidas no son las esperadas...`,
+      choices:[
+        {label:'Negar el video rotundamente', eff:{}, log:'negó rotundamente que fuera él en el video filtrado', special:'videoNegar'},
+        {label:'Hacerse el boludo y quedarse callado', eff:{}, log:'se hizo el boludo y no dijo nada sobre el video filtrado', special:'videoCallado'},
+        {label:'Subir una foto festejando un gol con el rifle apuntando al horizonte', eff:{}, log:'respondió al rumor con una foto desafiante festejando un gol', special:'videoDesafiante'},
+      ]},
   ];
 }
 function eventsFor33plus(){
@@ -1768,8 +1787,8 @@ function eventsFor33plus(){
       ]},
     { tag:'NUEVO ROMANCE', text:`Empezás una relación con alguien bastante más joven y los programas de chimentos no hablan de otra cosa.`,
       choices:[
-        {label:'Mostrar la relación sin problema', eff:{fama:4, opinion:-6}, log:'mostró públicamente un nuevo romance con diferencia de edad'},
-        {label:'Mantenerlo lejos de las cámaras', eff:{prensa:3}, log:'mantuvo en privado un nuevo romance con diferencia de edad'},
+        {label:'Mostrar la relación sin problema', eff:{fama:4, opinion:-6}, log:'mostró públicamente un nuevo romance con diferencia de edad', setFlag:'conocioModeloJoven'},
+        {label:'Mantenerlo lejos de las cámaras', eff:{prensa:3}, log:'mantuvo en privado un nuevo romance con diferencia de edad', setFlag:'conocioModeloJoven'},
       ]},
     { tag:'PELEA POR HERENCIA', text:`Se arma una pelea familiar grande por la herencia de un pariente, y tu nombre y tu plata quedan en el medio.`,
       choices:[
@@ -2481,6 +2500,22 @@ function hijoCreceEvent(){
     ]};
 }
 
+function modeloRepresentanteEvent(){
+  return { tag:'LA MODELO QUIERE SER TU REPRESENTANTE', text:`La modelo que conociste hace ya dos meses te dice que dejes a tu representante y la pongas a ella en su lugar.`,
+    choices:[
+      {label:'Aceptar el cambio', eff:{}, log:'aceptó que la modelo reemplazara a su representante', special:'modeloRepresentanteAceptar'},
+      {label:'Rechazar la propuesta', eff:{}, log:'rechazó que la modelo reemplazara a su representante', special:'modeloRepresentanteRechazar'},
+    ]};
+}
+
+function conferenciaMedidasEvent(){
+  return { tag:'CONFERENCIA: LAS MEDIDAS', text:`En una conferencia de prensa, un periodista te pregunta sin filtro por las medidas del video filtrado.`,
+    choices:[
+      {label:'Responder con humor y bajarle el tono', eff:{prensa:5, opinion:3}, log:'respondió con humor a una pregunta incómoda sobre el video filtrado'},
+      {label:'Cortar la conferencia en seco', eff:{prensa:-4, opinion:-2}, log:'cortó en seco una conferencia tras una pregunta incómoda'},
+    ]};
+}
+
 // El juego recuerda ciertas decisiones (flags seteados por setFlag en las elecciones)
 // y, si se dan las condiciones, mete un evento de seguimiento acorde a esa historia.
 function representanteQuiereMasEvent(){
@@ -2538,6 +2573,7 @@ function checkFlagFollowups(){
     {flag:'tieneFundacion', done:'seguidoFundacion', chance:0.30, build: fundacionSeguimientoEvent},
     {flag:'aceptoEmpresarioMediatico', done:'seguidoEmpresarioMediatico', chance:0.35, build: empresarioFavorEvent},
     {flag:'reconocioHijo', done:'seguidoHijo', chance:0.22, build: hijoCreceEvent},
+    {flag:'conocioModeloJoven', done:'seguidoModeloRepresentante', chance:0.30, build: modeloRepresentanteEvent},
     {flag:'representanteTurbioActivo', done:'seguidoRepresentanteTurbio', chance:0.28, build: representanteQuiereMasEvent},
     {flag:'coimeoAlDT', done:'seguidoCoimaDT', chance:0.30, build: investiganCoimaDTEvent},
     {flag:'ofertaCriptoRecibida', done:'seguidoSocioBuenachon', chance:0.30, build: socioBuenachonEvent},
@@ -2725,6 +2761,7 @@ function buildSeasonQueue(){
   if(state.flags.pendingCoimaDescubierta){ state.flags.pendingCoimaDescubierta=false; q.push(coimaDescubiertaEvent()); }
   if(state.flags.pendingEstafaJudicial){ state.flags.pendingEstafaJudicial=false; q.push(estafaJudicialEvent()); }
   if(state.flags.pendingRepresaliaCartel){ state.flags.pendingRepresaliaCartel=false; q.push(represaliaCartelEvent()); }
+  if(state.flags.pendingConferenciaMedidas){ state.flags.pendingConferenciaMedidas=false; q.push(conferenciaMedidasEvent()); }
   if(state.flags.pendingResultadoJusticia){ state.flags.pendingResultadoJusticia=false; q.push(resultadoJusticiaEvent()); }
   if(state.phase==='jugador' && (!state.contract || state.contract.yearsLeft <= 0)){ q.push(contractOfferEvent()); }
   else if(state.phase==='jugador' && state.club.d!=='LIBRE' && state.contract && state.contract.yearsLeft > 0 && Math.random() < 0.035){
@@ -2885,7 +2922,10 @@ function resolveChoice(c){
   if(state.currentEventMeta && state.currentEventMeta.retiro && state.phase==='jugador' && !state.flags.definioFuturo){
     state.flags.pendingDefinirFuturo = true;
   }
-  if(c.setFlag){ state.flags[c.setFlag] = true; }
+  if(c.setFlag){
+    if(Array.isArray(c.setFlag)){ c.setFlag.forEach(f => state.flags[f] = true); }
+    else { state.flags[c.setFlag] = true; }
+  }
   addLog(c.log + sufijo);
   if(state.currentSeasonEvents){
     state.currentSeasonEvents.push({
@@ -3126,6 +3166,57 @@ function resolveChoice(c){
     state.contract = { yearsLeft: Math.round(rand(1,3)), salaryPerYear: computeSalary(clubVuelta, state.stats.futbol, state.age) };
     state.prestamo = null;
     addLog(`rescindió tras la golpiza del cartel y volvió a jugar a ${clubVuelta.n} en Argentina`);
+  }
+  if(c.special==='cafeInfluencerAceptar'){
+    applyEffects({fama:8, opinion:-4, prensa:5});
+    if(Math.random() < 0.5){
+      applyEffects({futbol:2});
+      addLog('el café con la influencer le sentó bien, se notó en el nivel');
+    } else {
+      applyEffects({futbol:-2});
+      addLog('el café con la influencer lo descolocó, se notó en el nivel');
+    }
+    if(Math.random() < 0.4){
+      addLog('se filtró el encuentro con la influencer');
+      if(Math.random() < 0.7){
+        applyEffects({cabeza:-4});
+        addLog('su novia se enteró del café con la influencer y terminó la relación');
+      }
+    }
+  }
+  if(c.special==='modeloRepresentanteAceptar'){
+    const monto = pagarPorcentajeGanancias(0.5);
+    applyEffects({fama:6, opinion:5});
+    addLog(`le cedió el manejo de su carrera a la modelo; perdió ${fmtUSD(monto)} en el camino`);
+  }
+  if(c.special==='modeloRepresentanteRechazar'){
+    applyEffects({futbol:-1, fama:5, prensa:5, cabeza:-4});
+    addLog('terminó la relación con la modelo y subió una tanda de fotos en blanco y negro tras la ruptura');
+  }
+  if(c.special==='videoNegar'){
+    applyEffects({futbol:-1, plantel:-1, fama:4, opinion:3, prensa:4});
+    state.flags.pendingConferenciaMedidas = true;
+    if(Math.random() < 0.5){
+      applyEffects({opinion:-6, prensa:-4});
+      addLog('un tatuaje lo delató: quedó claro que era él en el video filtrado');
+    }
+  }
+  if(c.special==='videoCallado'){
+    applyEffects({plantel:-6, futbol:-1, fama:-3, opinion:-3});
+    addLog('el vestuario se la pasó cagándose de risa a su costa');
+  }
+  if(c.special==='videoDesafiante'){
+    applyEffects({fama:10, futbol:2, plantel:5, opinion:4, prensa:4});
+    state.modFutbolTemporal -= 4;
+    state.modPartidosTemporal -= 10;
+    addLog('la foto desafiante le sumó fama, pero le costó minutos de juego');
+  }
+  if(c.special==='cumbiaAceptar'){
+    if(Math.random() < 0.5){
+      state.modFutbolTemporal -= 3;
+      state.modPartidosTemporal -= 8;
+      addLog('al DT no le cayó nada bien el tema de cumbia y le bajó los minutos');
+    }
   }
   if(c.special==='periodistaAceptar'){
     if(Math.random() < 0.4){
